@@ -36,11 +36,14 @@ return [
     'sprints' => [
         'base_url' => env('ZOHO_SPRINTS_URL', 'https://sprints.zoho.com/zsapi'),
         'scopes'   => [
+            'ZohoSprints.teams.READ',
+            'ZohoSprints.teamusers.READ',
+            'ZohoSprints.projects.ALL',
+            'ZohoSprints.projectusers.READ',
             'ZohoSprints.sprints.ALL',
             'ZohoSprints.items.ALL',
+            'ZohoSprints.epic.ALL',
             'ZohoSprints.comments.ALL',
-            'ZohoSprints.users.READ',
-            'ZohoSprints.teams.READ',
         ],
     ],
 
