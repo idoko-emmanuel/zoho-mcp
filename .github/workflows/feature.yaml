@@ -1,0 +1,82 @@
+on:
+    push:
+        branches:
+            - feature/**
+            - feat/**
+name: 'Deploy feature'
+env:
+    PHP_VERSION: '8.3'
+jobs:
+    lint:
+        name: Check Lint
+        if: "!contains(github.event.head_commit.message, 'skip ci')"
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: ${{ env.PHP_VERSION }}
+                tools: composer
+            - name: Install dependencies
+              run: composer install --optimize-autoloader --ignore-platform-reqs
+            - name: Run Pint
+              run: vendor/bin/pint --test
+
+    test-unit:
+        name: Unit Test
+        needs: lint
+        if: "!contains(github.event.head_commit.message, 'skip ci')"
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: ${{ env.PHP_VERSION }}
+                extensions: mbstring, ctype, fileinfo, openssl, PDO, bcmath, json, tokenizer, xml, xmlrpc
+                tools: composer
+            - name: Cache Composer dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.composer/cache
+                key: composer-${{ hashFiles('composer.lock') }}
+                restore-keys: |
+                    composer-
+            - name: Install dependencies
+              run: composer install --optimize-autoloader --ignore-platform-reqs
+            - name: Prepare application
+              run: |
+                  php -r "file_exists('.env') || copy('.env.example', '.env');"
+                  php artisan key:generate
+            - name: Run unit tests
+              run: php artisan test --testsuite=Unit
+
+    test-feature:
+        name: Feature Test
+        needs: lint
+        if: "!contains(github.event.head_commit.message, 'skip ci')"
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v5
+            - name: Setup PHP
+              uses: shivammathur/setup-php@v2
+              with:
+                php-version: ${{ env.PHP_VERSION }}
+                extensions: mbstring, ctype, fileinfo, openssl, PDO, bcmath, json, tokenizer, xml, xmlrpc
+                tools: composer
+            - name: Cache Composer dependencies
+              uses: actions/cache@v4
+              with:
+                path: ~/.composer/cache
+                key: composer-${{ hashFiles('composer.lock') }}
+                restore-keys: |
+                    composer-
+            - name: Install dependencies
+              run: composer install --optimize-autoloader --ignore-platform-reqs
+            - name: Prepare application
+              run: |
+                  php -r "file_exists('.env') || copy('.env.example', '.env');"
+                  php artisan key:generate
+            - name: Run feature tests
+              run: php artisan test --testsuite=Feature
