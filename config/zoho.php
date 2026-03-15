@@ -34,7 +34,7 @@ return [
     */
 
     'sprints' => [
-        'base_url' => env('ZOHO_SPRINTS_URL', 'https://sprints.zoho.com/zsapi'),
+        'base_url' => env('ZOHO_SPRINTS_URL', 'https://sprintsapi.zoho.com/zsapi'),
         'scopes'   => [
             'ZohoSprints.teams.READ',
             'ZohoSprints.teamusers.READ',

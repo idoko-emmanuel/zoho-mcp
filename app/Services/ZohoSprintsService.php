@@ -29,12 +29,12 @@ class ZohoSprintsService
 
     public function listProjects(string $teamId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/", ['action' => 'allprojects'])->json();
     }
 
     public function getProject(string $teamId, string $projectId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/", ['action' => 'details'])->json();
     }
 
     public function createProject(string $teamId, array $data): array
@@ -58,12 +58,16 @@ class ZohoSprintsService
 
     public function listSprints(string $teamId, string $projectId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/")->json();
+        // type=[1,2,3,4] returns all sprint types (active, closed, upcoming, backlog)
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/", [
+            'action' => 'data',
+            'type'   => '[1,2,3,4]',
+        ])->json();
     }
 
     public function getSprint(string $teamId, string $projectId, string $sprintId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/", ['action' => 'data'])->json();
     }
 
     public function createSprint(string $teamId, string $projectId, array $data): array
@@ -87,12 +91,15 @@ class ZohoSprintsService
 
     public function listItems(string $teamId, string $projectId, string $sprintId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/", [
+            'action'  => 'sprintitems',
+            'subitem' => 'true',
+        ])->json();
     }
 
     public function getItem(string $teamId, string $projectId, string $sprintId, string $itemId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/", ['action' => 'details'])->json();
     }
 
     public function createItem(string $teamId, string $projectId, string $sprintId, array $data): array
@@ -116,27 +123,27 @@ class ZohoSprintsService
 
     public function listEpics(string $teamId, string $projectId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/epics/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/epic/", ['action' => 'data'])->json();
     }
 
     public function getEpic(string $teamId, string $projectId, string $epicId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/epics/{$epicId}/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/epic/{$epicId}/", ['action' => 'data'])->json();
     }
 
     public function createEpic(string $teamId, string $projectId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/epics/", $data)->json();
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/epic/", $data)->json();
     }
 
     public function updateEpic(string $teamId, string $projectId, string $epicId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/epics/{$epicId}/", $data)->json();
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/epic/{$epicId}/", $data)->json();
     }
 
     public function deleteEpic(string $teamId, string $projectId, string $epicId): array
     {
-        return $this->client()->delete("/team/{$teamId}/projects/{$projectId}/epics/{$epicId}/")->json();
+        return $this->client()->delete("/team/{$teamId}/projects/{$projectId}/epic/{$epicId}/")->json();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -145,7 +152,7 @@ class ZohoSprintsService
 
     public function listComments(string $teamId, string $projectId, string $sprintId, string $itemId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/comments/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/comments/", ['action' => 'data'])->json();
     }
 
     public function addComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $content): array
@@ -173,12 +180,12 @@ class ZohoSprintsService
 
     public function listTeamMembers(string $teamId): array
     {
-        return $this->client()->get("/team/{$teamId}/users/")->json();
+        return $this->client()->get("/team/{$teamId}/users/", ['action' => 'data'])->json();
     }
 
     public function listProjectMembers(string $teamId, string $projectId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/users/")->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/users/", ['action' => 'data'])->json();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
