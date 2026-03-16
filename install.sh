@@ -110,8 +110,11 @@ echo "  │  → Server-based Applications               │"
 echo "  └─────────────────────────────────────────────┘"
 echo ""
 
-read -r -p "  Zoho Client ID:     " ZOHO_CLIENT_ID
-read -r -p "  Zoho Client Secret: " ZOHO_CLIENT_SECRET
+ZOHO_CLIENT_ID=""
+ZOHO_CLIENT_SECRET=""
+
+read -r -p "  Zoho Client ID:     " ZOHO_CLIENT_ID </dev/tty
+read -r -p "  Zoho Client Secret: " ZOHO_CLIENT_SECRET </dev/tty
 echo ""
 
 # Region selection
@@ -121,7 +124,8 @@ echo "    2) .eu   — Europe"
 echo "    3) .in   — India"
 echo "    4) .com.au — Australia"
 echo ""
-read -r -p "  Select region [1]: " REGION_CHOICE
+REGION_CHOICE=""
+read -r -p "  Select region [1]: " REGION_CHOICE </dev/tty
 REGION_CHOICE="${REGION_CHOICE:-1}"
 
 case "$REGION_CHOICE" in
