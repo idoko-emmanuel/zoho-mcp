@@ -180,7 +180,7 @@ class ZohoSprintsService
 
     public function listModules(string $teamId): array
     {
-        return $this->client()->get("/team/{$teamId}/settings/customization/modules/")->json();
+        return $this->client()->get("/team/{$teamId}/settings/customization/modules/", ['action' => 'data'])->json();
     }
 
     // ──────────────────────────────────────────────────────────────────────────

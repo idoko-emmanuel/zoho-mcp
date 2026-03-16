@@ -195,13 +195,14 @@ it('sends a delete request to the correct notes url when deleting a comment', fu
 // Modules
 // ──────────────────────────────────────────────────────────────────────────────
 
-it('calls the correct url to list modules', function () {
+it('calls the correct url with action=data to list modules', function () {
     Http::fake(['sprintsapi.zoho.com/*' => Http::response(['modules' => []])]);
 
     $this->service->listModules('team1');
 
     Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/team/team1/settings/customization/modules/')
+        str_contains($req->url(), '/team/team1/settings/customization/modules/') &&
+        str_contains($req->url(), 'action=data')
     );
 });
 
