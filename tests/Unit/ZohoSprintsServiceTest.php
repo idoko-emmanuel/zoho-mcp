@@ -146,48 +146,48 @@ it('uses singular /epic/ path when listing epics', function () {
 // Comments
 // ──────────────────────────────────────────────────────────────────────────────
 
-it('lists comments using the modules/entity/notes url', function () {
+it('lists comments using the sprints/item/notes url', function () {
     Http::fake(['sprintsapi.zoho.com/*' => Http::response(['notes' => []])]);
 
-    $this->service->listComments('team1', 'proj1', 'mod1', 'item1');
+    $this->service->listComments('team1', 'proj1', 'sprint1', 'item1');
 
     Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/modules/mod1/entity/item1/notes/')
+        str_contains($req->url(), '/sprints/sprint1/item/item1/notes/')
     );
 });
 
-it('posts content to the modules/entity/notes url when adding a comment', function () {
+it('posts form-encoded name field when adding a comment', function () {
     Http::fake(['sprintsapi.zoho.com/*' => Http::response(['note' => []])]);
 
-    $this->service->addComment('team1', 'proj1', 'mod1', 'item1', 'Great work!');
+    $this->service->addComment('team1', 'proj1', 'sprint1', 'item1', 'Great work!');
 
     Http::assertSent(fn ($req) =>
         $req->method() === 'POST' &&
-        str_contains($req->url(), '/modules/mod1/entity/item1/notes/') &&
-        $req->data()['content'] === 'Great work!'
+        str_contains($req->url(), '/sprints/sprint1/item/item1/notes/') &&
+        $req->data()['name'] === 'Great work!'
     );
 });
 
-it('posts to the correct notes url when updating a comment', function () {
+it('posts form-encoded name field when updating a comment', function () {
     Http::fake(['sprintsapi.zoho.com/*' => Http::response(['note' => []])]);
 
-    $this->service->updateComment('team1', 'proj1', 'mod1', 'item1', 'note1', 'Updated!');
+    $this->service->updateComment('team1', 'proj1', 'sprint1', 'item1', 'note1', 'Updated!');
 
     Http::assertSent(fn ($req) =>
         $req->method() === 'POST' &&
-        str_contains($req->url(), '/modules/mod1/entity/item1/notes/note1/') &&
-        $req->data()['content'] === 'Updated!'
+        str_contains($req->url(), '/sprints/sprint1/item/item1/notes/note1/') &&
+        $req->data()['name'] === 'Updated!'
     );
 });
 
 it('sends a delete request to the correct notes url when deleting a comment', function () {
     Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
 
-    $this->service->deleteComment('team1', 'proj1', 'mod1', 'item1', 'note1');
+    $this->service->deleteComment('team1', 'proj1', 'sprint1', 'item1', 'note1');
 
     Http::assertSent(fn ($req) =>
         $req->method() === 'DELETE' &&
-        str_contains($req->url(), '/modules/mod1/entity/item1/notes/note1/')
+        str_contains($req->url(), '/sprints/sprint1/item/item1/notes/note1/')
     );
 });
 

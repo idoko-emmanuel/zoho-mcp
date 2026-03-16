@@ -150,28 +150,28 @@ class ZohoSprintsService
     // Comments
     // ──────────────────────────────────────────────────────────────────────────
 
-    public function listComments(string $teamId, string $projectId, string $moduleId, string $itemId): array
+    public function listComments(string $teamId, string $projectId, string $sprintId, string $itemId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/modules/{$moduleId}/entity/{$itemId}/notes/", ['action' => 'data'])->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/", ['action' => 'data'])->json();
     }
 
-    public function addComment(string $teamId, string $projectId, string $moduleId, string $itemId, string $content): array
+    public function addComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $content): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/modules/{$moduleId}/entity/{$itemId}/notes/", [
-            'content' => $content,
+        return $this->client()->asForm()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/", [
+            'name' => $content,
         ])->json();
     }
 
-    public function updateComment(string $teamId, string $projectId, string $moduleId, string $itemId, string $notesId, string $content): array
+    public function updateComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $notesId, string $content): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/modules/{$moduleId}/entity/{$itemId}/notes/{$notesId}/", [
-            'content' => $content,
+        return $this->client()->asForm()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/{$notesId}/", [
+            'name' => $content,
         ])->json();
     }
 
-    public function deleteComment(string $teamId, string $projectId, string $moduleId, string $itemId, string $notesId): array
+    public function deleteComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $notesId): array
     {
-        return $this->client()->delete("/team/{$teamId}/projects/{$projectId}/modules/{$moduleId}/entity/{$itemId}/notes/{$notesId}/")->json();
+        return $this->client()->delete("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/{$notesId}/")->json();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
