@@ -81,11 +81,14 @@ success "Repo ready at $INSTALL_DIR"
 
 cp "$INSTALL_DIR/.env.example" "$INSTALL_DIR/.env"
 
+# Clear bootstrap cache so stale discovery state can't block artisan
+rm -f "$INSTALL_DIR/bootstrap/cache/packages.php"
+rm -f "$INSTALL_DIR/bootstrap/cache/services.php"
+
 # ── 6. Install PHP dependencies ──────────────
 
 info "Installing dependencies ..."
 composer install --no-dev --no-interaction --no-scripts --working-dir="$INSTALL_DIR"
-php "$INSTALL_DIR/artisan" package:discover --ansi
 success "Dependencies installed"
 
 php "$INSTALL_DIR/artisan" key:generate --force
