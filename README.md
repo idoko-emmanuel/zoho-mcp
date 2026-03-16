@@ -1,5 +1,10 @@
 # Zoho Sprints MCP Server
 
+[![PHP Version](https://img.shields.io/badge/php-8.3%2B-blue)](https://www.php.net/)
+[![Laravel](https://img.shields.io/badge/laravel-12.x-red)](https://laravel.com)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Install](https://img.shields.io/badge/Install-curl%20%7C%20bash-brightgreen)](#installation)
+
 A Laravel 12 MCP server that connects Claude AI to Zoho Sprints — manage teams, projects, sprints, tasks, epics, and comments directly from your Claude conversations.
 
 Built with [php-mcp/laravel](https://github.com/php-mcp/laravel) and the [Model Context Protocol](https://modelcontextprotocol.io/).
@@ -29,8 +34,9 @@ Built with [php-mcp/laravel](https://github.com/php-mcp/laravel) and the [Model 
 
 ## Requirements
 
-- PHP 8.3+
-- Composer
+- PHP 8.3+ — [php.net/downloads](https://php.net/downloads) or via your package manager
+- Composer — [getcomposer.org/download](https://getcomposer.org/download) (the install script handles this automatically)
+- Git
 - A [Zoho Sprints](https://www.zoho.com/sprints/) account with **API access enabled**
 - A Zoho OAuth app registered at [api-console.zoho.com](https://api-console.zoho.com/) → **Server-based Applications**
 
@@ -38,18 +44,42 @@ Built with [php-mcp/laravel](https://github.com/php-mcp/laravel) and the [Model 
 
 ## Installation
 
+### One-line install (recommended)
+
+The install script checks for PHP 8.3+, installs Composer if missing, clones the repo, sets up the database, prompts for your Zoho credentials, and registers the MCP server with Claude Code automatically.
+
 ```bash
-git clone https://github.com/idoko-emmanuel/zoho-mcp.git
-cd zoho-mcp
-composer install
+curl -fsSL https://raw.githubusercontent.com/idoko-emmanuel/zoho-mcp/main/install.sh | bash
+```
+
+After the script completes, follow the on-screen instructions to complete the OAuth flow (one-time browser step).
+
+### Manual install
+
+If you prefer to run each step yourself:
+
+#### 1. Install Composer (skip if already installed)
+
+```bash
+php -r "copy('https://getcomposer.org/installer', 'composer-setup.php');"
+php composer-setup.php && rm composer-setup.php
+sudo mv composer.phar /usr/local/bin/composer
+```
+
+#### 2. Clone and set up
+
+```bash
+git clone https://github.com/idoko-emmanuel/zoho-mcp.git ~/.local/share/zoho-mcp
+cd ~/.local/share/zoho-mcp
+composer install --no-dev
 cp .env.example .env
 php artisan key:generate
 php artisan migrate
 ```
 
-## Configuration
+#### 3. Configure Zoho credentials
 
-Edit `.env` and fill in your Zoho credentials:
+Edit `.env` and fill in your Zoho OAuth credentials:
 
 ```env
 ZOHO_CLIENT_ID=your-client-id
@@ -61,59 +91,76 @@ ZOHO_ACCOUNTS_URL=https://accounts.zoho.com
 ZOHO_SPRINTS_URL=https://sprintsapi.zoho.com/zsapi
 ```
 
-**Enable API access in Zoho Sprints:**
-Go to **Zoho Sprints → Settings → API** and enable API access for your team.
-
----
-
-## Authorisation (One-time)
-
-Start the server and visit the auth URL in your browser:
+#### 4. Register with Claude Code
 
 ```bash
-php artisan serve
+claude mcp add --scope user zoho-sprints -- php ~/.local/share/zoho-mcp/artisan mcp:serve
 ```
 
-Then open: [http://localhost:8000/zoho/auth](http://localhost:8000/zoho/auth)
-
-Zoho will ask you to grant permissions. After approval you'll be redirected back and the tokens are saved. The server handles silent token refresh automatically from that point on.
-
----
-
-## Connecting to Claude
-
-### Claude Code (recommended)
-
-Add the server at user scope so it's available in every session:
-
-```bash
-claude mcp add --scope user zoho-sprints -- php /path/to/zoho-mcp/artisan mcp:serve
-```
-
-### Claude Desktop
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
+Or for Claude Desktop, add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
   "mcpServers": {
     "zoho-sprints": {
       "command": "php",
-      "args": ["/path/to/zoho-mcp/artisan", "mcp:serve"]
+      "args": ["/Users/you/.local/share/zoho-mcp/artisan", "mcp:serve"]
     }
   }
 }
 ```
 
-Restart Claude Desktop after saving.
+---
+
+## Uninstallation
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/idoko-emmanuel/zoho-mcp/main/uninstall.sh | bash
+```
+
+This will:
+
+- Remove the MCP server registration from Claude Code
+- Remove `~/.local/share/zoho-mcp`
 
 ---
 
-## Usage Examples
+## Zoho OAuth setup
 
-Once connected, you can ask Claude things like:
+### 1. Register your OAuth app
 
-- *"List all my Zoho Sprints projects"*
+Go to [api-console.zoho.com](https://api-console.zoho.com/) and create a **Server-based Application**. Set the redirect URI to:
+
+```text
+http://localhost:8000/zoho/callback
+```
+
+Copy your **Client ID** and **Client Secret** — you'll need them during install (or to edit `.env` manually).
+
+### 2. Enable API access in Zoho Sprints
+
+Go to **Zoho Sprints → Settings → API** and enable API access for your team.
+
+### 3. Authorise (one-time)
+
+Start the local server and complete the OAuth flow in your browser:
+
+```bash
+php ~/.local/share/zoho-mcp/artisan serve
+```
+
+Then open: [http://localhost:8000/zoho/auth](http://localhost:8000/zoho/auth)
+
+Zoho will ask you to grant permissions. After approval you'll be redirected back and the tokens are saved automatically. You can stop the server once authorised — the MCP server runs via stdio and doesn't need a persistent HTTP server.
+
+---
+
+## Usage examples
+
+Once connected, start a new Claude Code session and try:
+
+- *"List all my Zoho Sprints teams"*
+- *"Show me all projects in my team"*
 - *"Create a new sprint called 'Sprint 5' in project X starting next Monday"*
 - *"Show me all open items in the current sprint"*
 - *"Add a comment to task #123: 'Ready for review'"*
@@ -121,7 +168,7 @@ Once connected, you can ask Claude things like:
 
 ---
 
-## Running Tests
+## Running tests
 
 ```bash
 php artisan test
@@ -129,7 +176,7 @@ php artisan test
 
 ---
 
-## Project Structure
+## Project structure
 
 ```text
 app/
@@ -151,6 +198,28 @@ config/
 ├── mcp.php                      # MCP server configuration
 └── zoho.php                     # Zoho API configuration
 ```
+
+---
+
+## Contributing
+
+1. Create a feature branch from `main`:
+
+    ```bash
+    git checkout main
+    git pull
+    git checkout -b feat/your-feature-name
+    ```
+
+2. Make your changes and commit them.
+
+3. Push your branch and open a pull request against `main`:
+
+    ```bash
+    git push -u origin feat/your-feature-name
+    ```
+
+4. Ensure CI checks pass before requesting a review.
 
 ---
 
