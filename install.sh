@@ -79,9 +79,7 @@ success "Repo ready at $INSTALL_DIR"
 
 # ── 5. Configure environment ─────────────────
 
-if [[ ! -f "$INSTALL_DIR/.env" ]]; then
-  cp "$INSTALL_DIR/.env.example" "$INSTALL_DIR/.env"
-fi
+cp "$INSTALL_DIR/.env.example" "$INSTALL_DIR/.env"
 
 # ── 6. Install PHP dependencies ──────────────
 
