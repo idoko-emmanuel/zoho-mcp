@@ -88,4 +88,27 @@ class ItemTools
     ): array {
         return $this->sprints->deleteItem($team_id, $project_id, $sprint_id, $item_id);
     }
+
+    #[McpTool(name: 'zoho_create_subitem', description: 'Create a sub-item under an existing item in a sprint.')]
+    public function createSubitem(
+        string $team_id,
+        string $project_id,
+        string $sprint_id,
+        string $item_id,
+        string $name,
+        ?string $description = null,
+        ?string $assignee = null,
+        ?string $priority = null,
+        ?string $due_date = null,
+    ): array {
+        $data = array_filter([
+            'name'        => $name,
+            'description' => $description,
+            'assignee'    => $assignee,
+            'priority'    => $priority,
+            'duedate'     => $due_date,
+        ]);
+
+        return $this->sprints->createSubitem($team_id, $project_id, $sprint_id, $item_id, $data);
+    }
 }

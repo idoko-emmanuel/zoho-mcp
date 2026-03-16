@@ -146,26 +146,239 @@ it('uses singular /epic/ path when listing epics', function () {
 // Comments
 // ──────────────────────────────────────────────────────────────────────────────
 
-it('posts content when adding a comment', function () {
-    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['comment' => []])]);
+it('lists comments using the modules/entity/notes url', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['notes' => []])]);
 
-    $this->service->addComment('team1', 'proj1', 'sprint1', 'item1', 'Great work!');
+    $this->service->listComments('team1', 'proj1', 'mod1', 'item1');
+
+    Http::assertSent(fn ($req) =>
+        str_contains($req->url(), '/modules/mod1/entity/item1/notes/')
+    );
+});
+
+it('posts content to the modules/entity/notes url when adding a comment', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['note' => []])]);
+
+    $this->service->addComment('team1', 'proj1', 'mod1', 'item1', 'Great work!');
 
     Http::assertSent(fn ($req) =>
         $req->method() === 'POST' &&
-        str_contains($req->url(), '/comments/') &&
+        str_contains($req->url(), '/modules/mod1/entity/item1/notes/') &&
         $req->data()['content'] === 'Great work!'
     );
 });
 
-it('sends a delete request when deleting a comment', function () {
+it('posts to the correct notes url when updating a comment', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['note' => []])]);
+
+    $this->service->updateComment('team1', 'proj1', 'mod1', 'item1', 'note1', 'Updated!');
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'POST' &&
+        str_contains($req->url(), '/modules/mod1/entity/item1/notes/note1/') &&
+        $req->data()['content'] === 'Updated!'
+    );
+});
+
+it('sends a delete request to the correct notes url when deleting a comment', function () {
     Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
 
-    $this->service->deleteComment('team1', 'proj1', 'sprint1', 'item1', 'comment1');
+    $this->service->deleteComment('team1', 'proj1', 'mod1', 'item1', 'note1');
 
     Http::assertSent(fn ($req) =>
         $req->method() === 'DELETE' &&
-        str_contains($req->url(), '/comments/comment1/')
+        str_contains($req->url(), '/modules/mod1/entity/item1/notes/note1/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Modules
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('calls the correct url to list modules', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['modules' => []])]);
+
+    $this->service->listModules('team1');
+
+    Http::assertSent(fn ($req) =>
+        str_contains($req->url(), '/team/team1/settings/customization/modules/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Subitems
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('posts to the subitem url when creating a subitem', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['item' => []])]);
+
+    $this->service->createSubitem('team1', 'proj1', 'sprint1', 'item1', ['name' => 'Sub task']);
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'POST' &&
+        str_contains($req->url(), '/item/item1/subitem/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Attachments
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('posts to the attachments url when adding an attachment', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['attachment' => []])]);
+
+    $this->service->addItemAttachment('team1', 'proj1', 'sprint1', 'item1', ['url' => 'https://example.com/file.pdf']);
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'POST' &&
+        str_contains($req->url(), '/item/item1/attachments/')
+    );
+});
+
+it('sends a delete request when deleting an attachment', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
+
+    $this->service->deleteItemAttachment('team1', 'proj1', 'sprint1', 'item1', 'att1');
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'DELETE' &&
+        str_contains($req->url(), '/item/item1/attachment/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Linked Items
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('calls the correct url to get linked items', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['linkedItems' => []])]);
+
+    $this->service->getLinkedItems('team1', 'proj1', 'sprint1', 'item1');
+
+    Http::assertSent(fn ($req) =>
+        str_contains($req->url(), '/item/item1/linkitem/')
+    );
+});
+
+it('posts to the linkitem url when linking items', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
+
+    $this->service->linkItems('team1', 'proj1', 'sprint1', 'item1', ['linkTypeId' => 'lt1', 'linkedItemId' => 'item2']);
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'POST' &&
+        str_contains($req->url(), '/item/item1/linkitem/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Tags
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('calls the correct url to get item tags', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['tags' => []])]);
+
+    $this->service->getItemTags('team1', 'proj1', 'sprint1', 'item1');
+
+    Http::assertSent(fn ($req) =>
+        str_contains($req->url(), '/item/item1/tags/')
+    );
+});
+
+it('posts to the tags url when updating item tags', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
+
+    $this->service->updateItemTags('team1', 'proj1', 'sprint1', 'item1', ['tagId' => 'tag1']);
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'POST' &&
+        str_contains($req->url(), '/item/item1/tags/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Followers
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('calls the correct url to get item followers', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['followers' => []])]);
+
+    $this->service->getItemFollowers('team1', 'proj1', 'sprint1', 'item1');
+
+    Http::assertSent(fn ($req) =>
+        str_contains($req->url(), '/item/item1/followers/')
+    );
+});
+
+it('posts to the followers url when updating followers', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
+
+    $this->service->updateItemFollowers('team1', 'proj1', 'sprint1', 'item1', ['action' => 'add', 'userIds' => 'u1']);
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'POST' &&
+        str_contains($req->url(), '/item/item1/followers/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Reminders
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('calls the correct url to get an item reminder', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['reminder' => []])]);
+
+    $this->service->getItemReminder('team1', 'proj1', 'sprint1', 'item1');
+
+    Http::assertSent(fn ($req) =>
+        str_contains($req->url(), '/item/item1/reminder/')
+    );
+});
+
+it('posts to the reminder url when adding a reminder', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['reminder' => []])]);
+
+    $this->service->addItemReminder('team1', 'proj1', 'sprint1', 'item1', ['remindTime' => '1700000000000']);
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'POST' &&
+        str_contains($req->url(), '/item/item1/reminder/')
+    );
+});
+
+it('posts to the reminder id url when updating a reminder', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['reminder' => []])]);
+
+    $this->service->updateItemReminder('team1', 'proj1', 'sprint1', 'item1', 'rem1', ['remindTime' => '1700000000000']);
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'POST' &&
+        str_contains($req->url(), '/item/item1/reminder/rem1/')
+    );
+});
+
+it('sends a delete request when deleting a reminder', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
+
+    $this->service->deleteItemReminder('team1', 'proj1', 'sprint1', 'item1', 'rem1');
+
+    Http::assertSent(fn ($req) =>
+        $req->method() === 'DELETE' &&
+        str_contains($req->url(), '/item/item1/reminder/rem1/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Timer
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('calls the correct url to get sprint timer', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['timer' => []])]);
+
+    $this->service->getSprintTimer('team1', 'proj1', 'sprint1');
+
+    Http::assertSent(fn ($req) =>
+        str_contains($req->url(), '/sprints/sprint1/timer/')
     );
 });
 

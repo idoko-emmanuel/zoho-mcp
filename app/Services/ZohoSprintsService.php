@@ -150,28 +150,135 @@ class ZohoSprintsService
     // Comments
     // ──────────────────────────────────────────────────────────────────────────
 
-    public function listComments(string $teamId, string $projectId, string $sprintId, string $itemId): array
+    public function listComments(string $teamId, string $projectId, string $moduleId, string $itemId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/comments/", ['action' => 'data'])->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/modules/{$moduleId}/entity/{$itemId}/notes/", ['action' => 'data'])->json();
     }
 
-    public function addComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $content): array
+    public function addComment(string $teamId, string $projectId, string $moduleId, string $itemId, string $content): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/comments/", [
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/modules/{$moduleId}/entity/{$itemId}/notes/", [
             'content' => $content,
         ])->json();
     }
 
-    public function updateComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $commentId, string $content): array
+    public function updateComment(string $teamId, string $projectId, string $moduleId, string $itemId, string $notesId, string $content): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/comments/{$commentId}/", [
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/modules/{$moduleId}/entity/{$itemId}/notes/{$notesId}/", [
             'content' => $content,
         ])->json();
     }
 
-    public function deleteComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $commentId): array
+    public function deleteComment(string $teamId, string $projectId, string $moduleId, string $itemId, string $notesId): array
     {
-        return $this->client()->delete("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/comments/{$commentId}/")->json();
+        return $this->client()->delete("/team/{$teamId}/projects/{$projectId}/modules/{$moduleId}/entity/{$itemId}/notes/{$notesId}/")->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Modules
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function listModules(string $teamId): array
+    {
+        return $this->client()->get("/team/{$teamId}/settings/customization/modules/")->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Subitems
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function createSubitem(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
+    {
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/subitem/", $data)->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Attachments
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function addItemAttachment(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
+    {
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/attachments/", $data)->json();
+    }
+
+    public function deleteItemAttachment(string $teamId, string $projectId, string $sprintId, string $itemId, string $attachmentId): array
+    {
+        return $this->client()->delete("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/attachment/", ['attachmentId' => $attachmentId])->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Linked Items
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function getLinkedItems(string $teamId, string $projectId, string $sprintId, string $itemId): array
+    {
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/linkitem/")->json();
+    }
+
+    public function linkItems(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
+    {
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/linkitem/", $data)->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Tags
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function getItemTags(string $teamId, string $projectId, string $sprintId, string $itemId): array
+    {
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/tags/")->json();
+    }
+
+    public function updateItemTags(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
+    {
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/tags/", $data)->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Followers
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function getItemFollowers(string $teamId, string $projectId, string $sprintId, string $itemId): array
+    {
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/followers/")->json();
+    }
+
+    public function updateItemFollowers(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
+    {
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/followers/", $data)->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Reminders
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function getItemReminder(string $teamId, string $projectId, string $sprintId, string $itemId): array
+    {
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/reminder/")->json();
+    }
+
+    public function addItemReminder(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
+    {
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/reminder/", $data)->json();
+    }
+
+    public function updateItemReminder(string $teamId, string $projectId, string $sprintId, string $itemId, string $reminderId, array $data): array
+    {
+        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/reminder/{$reminderId}/", $data)->json();
+    }
+
+    public function deleteItemReminder(string $teamId, string $projectId, string $sprintId, string $itemId, string $reminderId): array
+    {
+        return $this->client()->delete("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/reminder/{$reminderId}/")->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Timer
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function getSprintTimer(string $teamId, string $projectId, string $sprintId): array
+    {
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/timer/")->json();
     }
 
     // ──────────────────────────────────────────────────────────────────────────

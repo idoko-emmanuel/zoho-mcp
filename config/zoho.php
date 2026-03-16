@@ -44,6 +44,7 @@ return [
             'ZohoSprints.items.ALL',
             'ZohoSprints.epic.ALL',
             'ZohoSprints.comments.ALL',
+            'ZohoSprints.settings.READ',
         ],
     ],
 
