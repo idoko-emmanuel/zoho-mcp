@@ -77,17 +77,18 @@ fi
 
 success "Repo ready at $INSTALL_DIR"
 
-# ── 5. Install PHP dependencies ──────────────
-
-info "Installing dependencies ..."
-composer install --no-dev --no-interaction --working-dir="$INSTALL_DIR"
-success "Dependencies installed"
-
-# ── 6. Configure environment ─────────────────
+# ── 5. Configure environment ─────────────────
 
 if [[ ! -f "$INSTALL_DIR/.env" ]]; then
   cp "$INSTALL_DIR/.env.example" "$INSTALL_DIR/.env"
 fi
+
+# ── 6. Install PHP dependencies ──────────────
+
+info "Installing dependencies ..."
+composer install --no-dev --no-interaction --no-scripts --working-dir="$INSTALL_DIR"
+php "$INSTALL_DIR/artisan" package:discover --ansi
+success "Dependencies installed"
 
 php "$INSTALL_DIR/artisan" key:generate --force
 success "App key set"
