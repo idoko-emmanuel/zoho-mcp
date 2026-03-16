@@ -146,13 +146,15 @@ it('uses singular /epic/ path when listing epics', function () {
 // Comments
 // ──────────────────────────────────────────────────────────────────────────────
 
-it('lists comments using the sprints/item/notes url', function () {
+it('lists comments using the sprints/item/notes url with index and range', function () {
     Http::fake(['sprintsapi.zoho.com/*' => Http::response(['notes' => []])]);
 
     $this->service->listComments('team1', 'proj1', 'sprint1', 'item1');
 
     Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/sprints/sprint1/item/item1/notes/')
+        str_contains($req->url(), '/sprints/sprint1/item/item1/notes/') &&
+        str_contains($req->url(), 'index=0') &&
+        str_contains($req->url(), 'range=20')
     );
 });
 

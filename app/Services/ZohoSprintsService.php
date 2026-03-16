@@ -150,9 +150,12 @@ class ZohoSprintsService
     // Comments
     // ──────────────────────────────────────────────────────────────────────────
 
-    public function listComments(string $teamId, string $projectId, string $sprintId, string $itemId): array
+    public function listComments(string $teamId, string $projectId, string $sprintId, string $itemId, int $index = 0, int $range = 20): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/", ['action' => 'data'])->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/", [
+            'index' => $index,
+            'range' => $range,
+        ])->json();
     }
 
     public function addComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $content): array

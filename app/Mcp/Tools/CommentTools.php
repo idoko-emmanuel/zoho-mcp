@@ -9,14 +9,16 @@ class CommentTools
 {
     public function __construct(private ZohoSprintsService $sprints) {}
 
-    #[McpTool(name: 'zoho_list_comments', description: 'List all comments on a Zoho Sprints item (task).')]
+    #[McpTool(name: 'zoho_list_comments', description: 'List comments on a Zoho Sprints item. Use index and range to paginate (default: first 20).')]
     public function listComments(
         string $team_id,
         string $project_id,
         string $sprint_id,
         string $item_id,
+        int $index = 0,
+        int $range = 20,
     ): array {
-        return $this->sprints->listComments($team_id, $project_id, $sprint_id, $item_id);
+        return $this->sprints->listComments($team_id, $project_id, $sprint_id, $item_id, $index, $range);
     }
 
     #[McpTool(name: 'zoho_add_comment', description: 'Add a comment to a Zoho Sprints item (task).')]
