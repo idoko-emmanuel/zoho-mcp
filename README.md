@@ -44,7 +44,7 @@ Built with [php-mcp/laravel](https://github.com/php-mcp/laravel) and the [Model 
 
 ## Installation
 
-### One-line install (recommended)
+### macOS / Linux — One-line install (recommended)
 
 The install script checks for PHP 8.3+, installs Composer if missing, clones the repo, sets up the database, prompts for your Zoho credentials, and registers the MCP server with Claude Code automatically.
 
@@ -54,7 +54,51 @@ curl -fsSL https://raw.githubusercontent.com/idoko-emmanuel/zoho-mcp/main/instal
 
 After the script completes, follow the on-screen instructions to complete the OAuth flow (one-time browser step).
 
-### Manual install
+### Windows
+
+The install script uses Unix shell syntax and won't run in PowerShell or Command Prompt. Use one of these approaches instead.
+
+> **Note:** If you run `curl -fsSL ...` in PowerShell you'll get an error because PowerShell's built-in `curl` is an alias for `Invoke-WebRequest` and doesn't accept Unix curl flags (`-f`, `-s`, `-S`, `-L`).
+
+#### Option A — WSL or Git Bash (recommended)
+
+If you have [WSL](https://learn.microsoft.com/en-us/windows/wsl/install) or [Git for Windows](https://git-scm.com/download/win) installed, open a WSL or Git Bash terminal and run the same one-liner:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/idoko-emmanuel/zoho-mcp/main/install.sh | bash
+```
+
+#### Option B — Manual install (PowerShell)
+
+```powershell
+git clone https://github.com/idoko-emmanuel/zoho-mcp.git "$env:LOCALAPPDATA\zoho-mcp"
+cd "$env:LOCALAPPDATA\zoho-mcp"
+copy .env.example .env
+composer install --no-dev --no-interaction --no-scripts
+php artisan key:generate --force
+php artisan migrate --force
+```
+
+Then edit `.env` to add your Zoho credentials (see [Configure Zoho credentials](#3-configure-zoho-credentials) below), and register the MCP server:
+
+```powershell
+claude mcp add --scope user zoho-sprints -- php "$env:LOCALAPPDATA\zoho-mcp\artisan" mcp:serve
+```
+
+For Claude Desktop, add to `%APPDATA%\Claude\claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "zoho-sprints": {
+      "command": "php",
+      "args": ["C:\\Users\\YourName\\AppData\\Local\\zoho-mcp\\artisan", "mcp:serve"]
+    }
+  }
+}
+```
+
+### Manual install (macOS / Linux)
 
 If you prefer to run each step yourself:
 
@@ -114,14 +158,23 @@ Or for Claude Desktop, add to `~/Library/Application Support/Claude/claude_deskt
 
 ## Uninstallation
 
+**macOS / Linux:**
+
 ```bash
 curl -fsSL https://raw.githubusercontent.com/idoko-emmanuel/zoho-mcp/main/uninstall.sh | bash
+```
+
+**Windows (PowerShell):**
+
+```powershell
+claude mcp remove zoho-sprints --scope user
+Remove-Item -Recurse -Force "$env:LOCALAPPDATA\zoho-mcp"
 ```
 
 This will:
 
 - Remove the MCP server registration from Claude Code
-- Remove `~/.local/share/zoho-mcp`
+- Remove the app directory (`~/.local/share/zoho-mcp` on macOS/Linux, `%LOCALAPPDATA%\zoho-mcp` on Windows)
 
 ---
 
