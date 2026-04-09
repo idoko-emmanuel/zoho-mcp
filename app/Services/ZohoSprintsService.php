@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use Composer\CaBundle\CaBundle;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Support\Facades\Http;
 
@@ -304,7 +305,8 @@ class ZohoSprintsService
 
     private function client(): PendingRequest
     {
-        return Http::baseUrl($this->baseUrl)
+        return Http::withOptions(['verify' => CaBundle::getSystemCaRootBundlePath()])
+            ->baseUrl($this->baseUrl)
             ->withToken($this->auth->getValidToken())
             ->acceptJson()
             ->throw();

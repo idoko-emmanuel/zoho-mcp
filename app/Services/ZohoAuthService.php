@@ -3,6 +3,8 @@
 namespace App\Services;
 
 use App\Models\ZohoToken;
+use Composer\CaBundle\CaBundle;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
@@ -45,7 +47,7 @@ class ZohoAuthService
      */
     public function handleCallback(string $code): ZohoToken
     {
-        $response = Http::asForm()->post($this->accountsUrl . '/oauth/v2/token', [
+        $response = $this->http()->asForm()->post($this->accountsUrl . '/oauth/v2/token', [
             'grant_type'    => 'authorization_code',
             'client_id'     => $this->clientId,
             'client_secret' => $this->clientSecret,
@@ -83,7 +85,7 @@ class ZohoAuthService
      */
     private function refresh(ZohoToken $token): ZohoToken
     {
-        $response = Http::asForm()->post($this->accountsUrl . '/oauth/v2/token', [
+        $response = $this->http()->asForm()->post($this->accountsUrl . '/oauth/v2/token', [
             'grant_type'    => 'refresh_token',
             'client_id'     => $this->clientId,
             'client_secret' => $this->clientSecret,
@@ -114,6 +116,13 @@ class ZohoAuthService
             'expires_in'    => $data['expires_in'] ?? 3600,
             'expires_at'    => Carbon::now()->addSeconds(($data['expires_in'] ?? 3600) - 60),
             'api_domain'    => $data['api_domain'] ?? null,
+        ]);
+    }
+
+    private function http(): PendingRequest
+    {
+        return Http::withOptions([
+            'verify' => CaBundle::getSystemCaRootBundlePath(),
         ]);
     }
 
