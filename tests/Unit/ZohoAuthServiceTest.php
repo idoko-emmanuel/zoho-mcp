@@ -2,6 +2,7 @@
 
 use App\Models\ZohoToken;
 use App\Services\ZohoAuthService;
+use Composer\CaBundle\CaBundle;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 
@@ -159,4 +160,32 @@ it('preserves the refresh token after a silent refresh', function () {
 it('throws when no token has been stored yet', function () {
     expect(fn () => $this->service->getValidToken())
         ->toThrow(RuntimeException::class, 'No Zoho token found');
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// SSL / CA bundle
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('resolves a readable ca bundle for ssl verification', function () {
+    $path = CaBundle::getSystemCaRootBundlePath();
+
+    expect($path)->not->toBeEmpty();
+    expect(file_exists($path))->toBeTrue();
+    expect(is_readable($path))->toBeTrue();
+});
+
+it('sends token exchange request successfully with ca bundle configured', function () {
+    Http::fake([
+        'accounts.zoho.com/oauth/v2/token' => Http::response([
+            'access_token'  => 'ssl-test-token',
+            'refresh_token' => 'ssl-refresh',
+            'token_type'    => 'Bearer',
+            'expires_in'    => 3600,
+        ]),
+    ]);
+
+    $token = $this->service->handleCallback('ssl-test-code');
+
+    expect($token->access_token)->toBe('ssl-test-token');
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/oauth/v2/token'));
 });
