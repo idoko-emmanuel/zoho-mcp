@@ -9,6 +9,10 @@ INSTALL_DIR="$HOME/.local/share/zoho-mcp"
 REPO_URL="https://github.com/idoko-emmanuel/zoho-mcp.git"
 MCP_NAME="zoho-sprints"
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=scripts/path_helpers.sh
+source "$SCRIPT_DIR/scripts/path_helpers.sh"
+
 # ── helpers ──────────────────────────────────
 
 info()    { echo "  → $*"; }
@@ -166,30 +170,67 @@ success "Zoho credentials saved"
 
 # ── 9. Register with Claude Code ─────────────
 
+# Detect OS for config file paths
+case "$(uname -s)" in
+  Darwin)  DESKTOP_CONFIG="$HOME/Library/Application Support/Claude/claude_desktop_config.json"
+           VSCODE_CONFIG="$HOME/.claude/settings.json" ;;
+  MINGW*|MSYS*|CYGWIN*)
+           DESKTOP_CONFIG="${APPDATA}\\Claude\\claude_desktop_config.json"
+           VSCODE_CONFIG="${USERPROFILE}\\.claude\\settings.json" ;;
+  *)       DESKTOP_CONFIG="${XDG_CONFIG_HOME:-$HOME/.config}/claude/claude_desktop_config.json"
+           VSCODE_CONFIG="$HOME/.claude/settings.json" ;;
+esac
+
+MCP_JSON=$(cat <<JSON
+{
+  "mcpServers": {
+    "$MCP_NAME": {
+      "command": "php",
+      "args": ["$INSTALL_DIR/artisan", "mcp:serve"]
+    }
+  }
+}
+JSON
+)
+
 if command -v claude &>/dev/null; then
   info "Registering MCP server with Claude Code ..."
-  claude mcp add --scope user "$MCP_NAME" -- php "$INSTALL_DIR/artisan" mcp:serve
+
+  ARTISAN_PATH="$(resolve_artisan_path "$INSTALL_DIR")"
+  claude mcp add --scope user "$MCP_NAME" -- php "$ARTISAN_PATH" mcp:serve
   success "MCP server registered as '$MCP_NAME'"
 else
   echo ""
-  info "Claude Code CLI not found. Register manually:"
+  echo "  ┌─────────────────────────────────────────────┐"
+  echo "  │        Claude Code CLI not found            │"
+  echo "  │  Choose one of the options below to         │"
+  echo "  │  register the MCP server manually.          │"
+  echo "  └─────────────────────────────────────────────┘"
+  echo ""
+
+  echo "  Option A — Claude Code CLI (if installed later):"
   echo ""
   echo "    claude mcp add --scope user $MCP_NAME -- php $INSTALL_DIR/artisan mcp:serve"
   echo ""
-  echo "  Or for Claude Desktop, add to:"
-  echo "    ~/Library/Application Support/Claude/claude_desktop_config.json"
+
+  echo "  Option B — Claude Desktop:"
+  echo "    Edit: $DESKTOP_CONFIG"
   echo ""
-  echo '    {'
-  echo '      "mcpServers": {'
-  echo "        \"$MCP_NAME\": {"
-  echo '          "command": "php",'
-  echo "          \"args\": [\"$INSTALL_DIR/artisan\", \"mcp:serve\"]"
-  echo '        }'
-  echo '      }'
-  echo '    }'
+  echo "$MCP_JSON"
+  echo ""
+
+  echo "  Option C — Claude VSCode extension:"
+  echo "    Edit your global Claude settings file:"
+  echo "    $VSCODE_CONFIG"
+  echo ""
+  echo "    Add the same JSON block under the \"mcpServers\" key."
+  echo "    (Create the file if it doesn't exist.)"
+  echo ""
 fi
 
 # ── Done ─────────────────────────────────────
+
+DISPLAY_ARTISAN="$(resolve_artisan_path "$INSTALL_DIR")"
 
 echo ""
 echo "  Installation complete."
@@ -197,7 +238,7 @@ echo ""
 echo "  One more step — complete the Zoho OAuth flow:"
 echo ""
 echo "    1. Start the server:"
-echo "         php $INSTALL_DIR/artisan serve"
+echo "         php $DISPLAY_ARTISAN serve"
 echo ""
 echo "    2. Open in your browser:"
 echo "         http://localhost:8000/zoho/auth"
@@ -205,6 +246,6 @@ echo ""
 echo "    3. Approve access in Zoho. Tokens are saved automatically."
 echo "       You can stop the server once authorised."
 echo ""
-echo "  Then start a new Claude Code session and try:"
+echo "  Then start a new Claude session (CLI, VSCode extension, or Desktop) and try:"
 echo "    \"List all my Zoho Sprints teams\""
 echo ""
