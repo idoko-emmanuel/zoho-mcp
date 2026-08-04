@@ -34,8 +34,7 @@ it('includes action=allprojects when listing projects', function () {
 
     $this->service->listProjects('team1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/team/team1/projects/') &&
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/projects/') &&
         str_contains($req->url(), 'action=allprojects')
     );
 });
@@ -45,8 +44,7 @@ it('includes action=details when getting a project', function () {
 
     $this->service->getProject('team1', 'proj1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/team/team1/projects/proj1/') &&
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/projects/proj1/') &&
         str_contains($req->url(), 'action=details')
     );
 });
@@ -56,8 +54,7 @@ it('posts to the correct url when creating a project', function () {
 
     $this->service->createProject('team1', ['name' => 'New Project']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/team/team1/projects/')
     );
 });
@@ -71,8 +68,7 @@ it('includes action=data and all sprint types when listing sprints', function ()
 
     $this->service->listSprints('team1', 'proj1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/team/team1/projects/proj1/sprints/') &&
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/projects/proj1/sprints/') &&
         str_contains($req->url(), 'action=data') &&
         str_contains($req->url(), 'type=')
     );
@@ -83,8 +79,7 @@ it('posts to the correct url when creating a sprint', function () {
 
     $this->service->createSprint('team1', 'proj1', ['name' => 'Sprint 1']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/team/team1/projects/proj1/sprints/')
     );
 });
@@ -98,8 +93,7 @@ it('includes action=sprintitems and subitem=true when listing items', function (
 
     $this->service->listItems('team1', 'proj1', 'sprint1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/item/') &&
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/item/') &&
         str_contains($req->url(), 'action=sprintitems') &&
         str_contains($req->url(), 'subitem=true')
     );
@@ -110,8 +104,7 @@ it('includes action=details when getting an item', function () {
 
     $this->service->getItem('team1', 'proj1', 'sprint1', 'item1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/item/item1/') &&
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/item/item1/') &&
         str_contains($req->url(), 'action=details')
     );
 });
@@ -121,8 +114,7 @@ it('sends a delete request when deleting an item', function () {
 
     $this->service->deleteItem('team1', 'proj1', 'sprint1', 'item1');
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'DELETE' &&
+    Http::assertSent(fn ($req) => $req->method() === 'DELETE' &&
         str_contains($req->url(), '/item/item1/')
     );
 });
@@ -136,8 +128,7 @@ it('uses singular /epic/ path when listing epics', function () {
 
     $this->service->listEpics('team1', 'proj1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/epic/') &&
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/epic/') &&
         str_contains($req->url(), 'action=data')
     );
 });
@@ -151,8 +142,7 @@ it('lists comments using the sprints/item/notes url with index and range', funct
 
     $this->service->listComments('team1', 'proj1', 'sprint1', 'item1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/sprints/sprint1/item/item1/notes/') &&
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/sprints/sprint1/item/item1/notes/') &&
         str_contains($req->url(), 'index=0') &&
         str_contains($req->url(), 'range=20')
     );
@@ -163,8 +153,7 @@ it('posts form-encoded name field when adding a comment', function () {
 
     $this->service->addComment('team1', 'proj1', 'sprint1', 'item1', 'Great work!');
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/sprints/sprint1/item/item1/notes/') &&
         $req->data()['name'] === 'Great work!'
     );
@@ -175,8 +164,7 @@ it('posts form-encoded name field when updating a comment', function () {
 
     $this->service->updateComment('team1', 'proj1', 'sprint1', 'item1', 'note1', 'Updated!');
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/sprints/sprint1/item/item1/notes/note1/') &&
         $req->data()['name'] === 'Updated!'
     );
@@ -187,8 +175,7 @@ it('sends a delete request to the correct notes url when deleting a comment', fu
 
     $this->service->deleteComment('team1', 'proj1', 'sprint1', 'item1', 'note1');
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'DELETE' &&
+    Http::assertSent(fn ($req) => $req->method() === 'DELETE' &&
         str_contains($req->url(), '/sprints/sprint1/item/item1/notes/note1/')
     );
 });
@@ -202,8 +189,7 @@ it('calls the correct url with action=data to list modules', function () {
 
     $this->service->listModules('team1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/team/team1/settings/customization/modules/') &&
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/settings/customization/modules/') &&
         str_contains($req->url(), 'action=data')
     );
 });
@@ -217,8 +203,7 @@ it('posts to the subitem url when creating a subitem', function () {
 
     $this->service->createSubitem('team1', 'proj1', 'sprint1', 'item1', ['name' => 'Sub task']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/item/item1/subitem/')
     );
 });
@@ -232,8 +217,7 @@ it('posts to the attachments url when adding an attachment', function () {
 
     $this->service->addItemAttachment('team1', 'proj1', 'sprint1', 'item1', ['url' => 'https://example.com/file.pdf']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/item/item1/attachments/')
     );
 });
@@ -243,8 +227,7 @@ it('sends a delete request when deleting an attachment', function () {
 
     $this->service->deleteItemAttachment('team1', 'proj1', 'sprint1', 'item1', 'att1');
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'DELETE' &&
+    Http::assertSent(fn ($req) => $req->method() === 'DELETE' &&
         str_contains($req->url(), '/item/item1/attachment/')
     );
 });
@@ -258,8 +241,7 @@ it('calls the correct url to get linked items', function () {
 
     $this->service->getLinkedItems('team1', 'proj1', 'sprint1', 'item1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/item/item1/linkitem/')
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/item/item1/linkitem/')
     );
 });
 
@@ -268,8 +250,7 @@ it('posts to the linkitem url when linking items', function () {
 
     $this->service->linkItems('team1', 'proj1', 'sprint1', 'item1', ['linkTypeId' => 'lt1', 'linkedItemId' => 'item2']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/item/item1/linkitem/')
     );
 });
@@ -283,8 +264,7 @@ it('calls the correct url to get item tags', function () {
 
     $this->service->getItemTags('team1', 'proj1', 'sprint1', 'item1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/item/item1/tags/')
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/item/item1/tags/')
     );
 });
 
@@ -293,8 +273,7 @@ it('posts to the tags url when updating item tags', function () {
 
     $this->service->updateItemTags('team1', 'proj1', 'sprint1', 'item1', ['tagId' => 'tag1']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/item/item1/tags/')
     );
 });
@@ -308,8 +287,7 @@ it('calls the correct url to get item followers', function () {
 
     $this->service->getItemFollowers('team1', 'proj1', 'sprint1', 'item1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/item/item1/followers/')
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/item/item1/followers/')
     );
 });
 
@@ -318,8 +296,7 @@ it('posts to the followers url when updating followers', function () {
 
     $this->service->updateItemFollowers('team1', 'proj1', 'sprint1', 'item1', ['action' => 'add', 'userIds' => 'u1']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/item/item1/followers/')
     );
 });
@@ -333,8 +310,7 @@ it('calls the correct url to get an item reminder', function () {
 
     $this->service->getItemReminder('team1', 'proj1', 'sprint1', 'item1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/item/item1/reminder/')
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/item/item1/reminder/')
     );
 });
 
@@ -343,8 +319,7 @@ it('posts to the reminder url when adding a reminder', function () {
 
     $this->service->addItemReminder('team1', 'proj1', 'sprint1', 'item1', ['remindTime' => '1700000000000']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/item/item1/reminder/')
     );
 });
@@ -354,8 +329,7 @@ it('posts to the reminder id url when updating a reminder', function () {
 
     $this->service->updateItemReminder('team1', 'proj1', 'sprint1', 'item1', 'rem1', ['remindTime' => '1700000000000']);
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'POST' &&
+    Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/item/item1/reminder/rem1/')
     );
 });
@@ -365,8 +339,7 @@ it('sends a delete request when deleting a reminder', function () {
 
     $this->service->deleteItemReminder('team1', 'proj1', 'sprint1', 'item1', 'rem1');
 
-    Http::assertSent(fn ($req) =>
-        $req->method() === 'DELETE' &&
+    Http::assertSent(fn ($req) => $req->method() === 'DELETE' &&
         str_contains($req->url(), '/item/item1/reminder/rem1/')
     );
 });
@@ -380,8 +353,68 @@ it('calls the correct url to get sprint timer', function () {
 
     $this->service->getSprintTimer('team1', 'proj1', 'sprint1');
 
-    Http::assertSent(fn ($req) =>
-        str_contains($req->url(), '/sprints/sprint1/timer/')
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/sprints/sprint1/timer/')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Members — Zoho 500s on these endpoints unless index+range are sent
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('sends a 1-based index and range when listing team members', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['userJObj' => []])]);
+
+    $this->service->listTeamMembers('team1');
+
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/users/') &&
+        str_contains($req->url(), 'action=data') &&
+        str_contains($req->url(), 'index=1') &&
+        str_contains($req->url(), 'range=100')
+    );
+});
+
+it('sends index and range when listing project members', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['userJObj' => []])]);
+
+    $this->service->listProjectMembers('team1', 'proj1', 3, 25);
+
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/projects/proj1/users/') &&
+        str_contains($req->url(), 'index=3') &&
+        str_contains($req->url(), 'range=25')
+    );
+});
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Project customization
+// ──────────────────────────────────────────────────────────────────────────────
+
+it('includes action=data when listing item statuses', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['statusJObj' => []])]);
+
+    $this->service->listItemStatuses('team1', 'proj1');
+
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/projects/proj1/itemstatus/') &&
+        str_contains($req->url(), 'action=data')
+    );
+});
+
+it('includes action=data when listing item types', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['projItemTypeJObj' => []])]);
+
+    $this->service->listItemTypes('team1', 'proj1');
+
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/projects/proj1/itemtype/') &&
+        str_contains($req->url(), 'action=data')
+    );
+});
+
+it('includes action=data when listing priorities', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['projPriorityJObj' => []])]);
+
+    $this->service->listPriorities('team1', 'proj1');
+
+    Http::assertSent(fn ($req) => str_contains($req->url(), '/team/team1/projects/proj1/priority/') &&
+        str_contains($req->url(), 'action=data')
     );
 });
 
@@ -394,7 +427,6 @@ it('sends the bearer token on every request', function () {
 
     $this->service->listTeams();
 
-    Http::assertSent(fn ($req) =>
-        $req->hasHeader('Authorization', 'Bearer fake-token')
+    Http::assertSent(fn ($req) => $req->hasHeader('Authorization', 'Bearer fake-token')
     );
 });

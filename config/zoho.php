@@ -10,9 +10,9 @@ return [
     | Set the redirect URI to: {APP_URL}/zoho/callback
     */
 
-    'client_id'     => env('ZOHO_CLIENT_ID'),
+    'client_id' => env('ZOHO_CLIENT_ID'),
     'client_secret' => env('ZOHO_CLIENT_SECRET'),
-    'redirect_uri'  => env('ZOHO_REDIRECT_URI', env('APP_URL') . '/zoho/callback'),
+    'redirect_uri' => env('ZOHO_REDIRECT_URI', env('APP_URL').'/zoho/callback'),
 
     /*
     |--------------------------------------------------------------------------
@@ -35,7 +35,7 @@ return [
 
     'sprints' => [
         'base_url' => env('ZOHO_SPRINTS_URL', 'https://sprintsapi.zoho.com/zsapi'),
-        'scopes'   => [
+        'scopes' => [
             'ZohoSprints.teams.READ',
             'ZohoSprints.teamusers.READ',
             'ZohoSprints.projects.ALL',
@@ -45,6 +45,9 @@ return [
             'ZohoSprints.epic.ALL',
             'ZohoSprints.comments.ALL',
             'ZohoSprints.settings.READ',
+            // Identifies who authorised the server (zoho_whoami). Zoho Sprints has no
+            // "current user" endpoint of its own, so this comes from Zoho accounts.
+            'AaaServer.profile.READ',
         ],
     ],
 

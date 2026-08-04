@@ -29,7 +29,7 @@ class FollowerTools
         string $user_ids,
     ): array {
         return $this->sprints->updateItemFollowers($team_id, $project_id, $sprint_id, $item_id, [
-            'action'  => $action,
+            'action' => $action,
             'userIds' => $user_ids,
         ]);
     }

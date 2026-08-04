@@ -13,16 +13,19 @@ use RuntimeException;
 class ZohoAuthService
 {
     private string $accountsUrl;
+
     private string $clientId;
+
     private string $clientSecret;
+
     private string $redirectUri;
 
     public function __construct()
     {
-        $this->accountsUrl  = rtrim(config('zoho.accounts_url'), '/');
-        $this->clientId     = config('zoho.client_id');
+        $this->accountsUrl = rtrim(config('zoho.accounts_url'), '/');
+        $this->clientId = config('zoho.client_id');
         $this->clientSecret = config('zoho.client_secret');
-        $this->redirectUri  = config('zoho.redirect_uri');
+        $this->redirectUri = config('zoho.redirect_uri');
     }
 
     /**
@@ -32,13 +35,13 @@ class ZohoAuthService
     {
         $scopes = implode(',', config('zoho.sprints.scopes'));
 
-        return $this->accountsUrl . '/oauth/v2/auth?' . http_build_query([
+        return $this->accountsUrl.'/oauth/v2/auth?'.http_build_query([
             'response_type' => 'code',
-            'client_id'     => $this->clientId,
-            'scope'         => $scopes,
-            'redirect_uri'  => $this->redirectUri,
-            'access_type'   => 'offline',
-            'prompt'        => 'consent',
+            'client_id' => $this->clientId,
+            'scope' => $scopes,
+            'redirect_uri' => $this->redirectUri,
+            'access_type' => 'offline',
+            'prompt' => 'consent',
         ]);
     }
 
@@ -47,12 +50,12 @@ class ZohoAuthService
      */
     public function handleCallback(string $code): ZohoToken
     {
-        $response = $this->http()->asForm()->post($this->accountsUrl . '/oauth/v2/token', [
-            'grant_type'    => 'authorization_code',
-            'client_id'     => $this->clientId,
+        $response = $this->http()->asForm()->post($this->accountsUrl.'/oauth/v2/token', [
+            'grant_type' => 'authorization_code',
+            'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
-            'redirect_uri'  => $this->redirectUri,
-            'code'          => $code,
+            'redirect_uri' => $this->redirectUri,
+            'code' => $code,
         ]);
 
         $this->assertSuccess($response, 'token exchange');
@@ -69,7 +72,7 @@ class ZohoAuthService
 
         if (! $token) {
             throw new RuntimeException(
-                'No Zoho token found. Visit ' . url('/zoho/auth') . ' to authorise.'
+                'No Zoho token found. Visit '.url('/zoho/auth').' to authorise.'
             );
         }
 
@@ -81,13 +84,38 @@ class ZohoAuthService
     }
 
     /**
+     * The Zoho account that authorised this server. Needs the AaaServer.profile.READ
+     * scope — a token issued before that scope was added is rejected, and the user has
+     * to re-authorise for it to start working.
+     *
+     * @return array<string, mixed>
+     */
+    public function getUserInfo(): array
+    {
+        $response = $this->http()
+            ->withHeaders(['Authorization' => 'Zoho-oauthtoken '.$this->getValidToken()])
+            ->get($this->accountsUrl.'/oauth/user/info');
+
+        if (str_contains((string) $response->body(), 'INVALID_OAUTHSCOPE')) {
+            throw new RuntimeException(
+                'This Zoho token was issued without the AaaServer.profile.READ scope. '
+                .'Re-authorise at '.url('/zoho/auth').' to enable zoho_whoami.'
+            );
+        }
+
+        $this->assertSuccess($response, 'user info');
+
+        return $response->json();
+    }
+
+    /**
      * Use the stored refresh token to obtain a new access token.
      */
     private function refresh(ZohoToken $token): ZohoToken
     {
-        $response = $this->http()->asForm()->post($this->accountsUrl . '/oauth/v2/token', [
-            'grant_type'    => 'refresh_token',
-            'client_id'     => $this->clientId,
+        $response = $this->http()->asForm()->post($this->accountsUrl.'/oauth/v2/token', [
+            'grant_type' => 'refresh_token',
+            'client_id' => $this->clientId,
             'client_secret' => $this->clientSecret,
             'refresh_token' => $token->refresh_token,
         ]);
@@ -110,12 +138,12 @@ class ZohoAuthService
         ZohoToken::truncate();
 
         return ZohoToken::create([
-            'access_token'  => $data['access_token'],
+            'access_token' => $data['access_token'],
             'refresh_token' => $data['refresh_token'] ?? null,
-            'token_type'    => $data['token_type'] ?? 'Bearer',
-            'expires_in'    => $data['expires_in'] ?? 3600,
-            'expires_at'    => Carbon::now()->addSeconds(($data['expires_in'] ?? 3600) - 60),
-            'api_domain'    => $data['api_domain'] ?? null,
+            'token_type' => $data['token_type'] ?? 'Bearer',
+            'expires_in' => $data['expires_in'] ?? 3600,
+            'expires_at' => Carbon::now()->addSeconds(($data['expires_in'] ?? 3600) - 60),
+            'api_domain' => $data['api_domain'] ?? null,
         ]);
     }
 
@@ -130,7 +158,7 @@ class ZohoAuthService
     {
         if ($response->failed() || isset($response->json()['error'])) {
             throw new RuntimeException(
-                "Zoho {$context} failed: " . ($response->json()['error'] ?? $response->body())
+                "Zoho {$context} failed: ".($response->json()['error'] ?? $response->body())
             );
         }
     }

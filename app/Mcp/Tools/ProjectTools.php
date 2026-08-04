@@ -55,11 +55,13 @@ class ProjectTools
         return $this->sprints->deleteProject($team_id, $project_id);
     }
 
-    #[McpTool(name: 'zoho_list_project_members', description: 'List all members of a Zoho Sprints project.')]
+    #[McpTool(name: 'zoho_list_project_members', description: 'List all members of a Zoho Sprints project. Use index and range to paginate (default: first 100; index is 1-based).')]
     public function listProjectMembers(
         string $team_id,
         string $project_id,
+        int $index = 1,
+        int $range = 100,
     ): array {
-        return $this->sprints->listProjectMembers($team_id, $project_id);
+        return $this->sprints->listProjectMembers($team_id, $project_id, $index, $range);
     }
 }

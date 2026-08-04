@@ -35,9 +35,9 @@ class SprintTools
         ?string $end_date = null,
     ): array {
         $data = array_filter([
-            'name'       => $name,
-            'startdate'  => $start_date,
-            'enddate'    => $end_date,
+            'name' => $name,
+            'startdate' => $start_date,
+            'enddate' => $end_date,
         ]);
 
         return $this->sprints->createSprint($team_id, $project_id, $data);
@@ -54,10 +54,10 @@ class SprintTools
         ?string $status = null,
     ): array {
         $data = array_filter([
-            'name'       => $name,
-            'startdate'  => $start_date,
-            'enddate'    => $end_date,
-            'status'     => $status,
+            'name' => $name,
+            'startdate' => $start_date,
+            'enddate' => $end_date,
+            'status' => $status,
         ]);
 
         return $this->sprints->updateSprint($team_id, $project_id, $sprint_id, $data);

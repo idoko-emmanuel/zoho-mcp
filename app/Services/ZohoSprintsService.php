@@ -62,7 +62,7 @@ class ZohoSprintsService
         // type=[1,2,3,4] returns all sprint types (active, closed, upcoming, backlog)
         return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/", [
             'action' => 'data',
-            'type'   => '[1,2,3,4]',
+            'type' => '[1,2,3,4]',
         ])->json();
     }
 
@@ -93,7 +93,7 @@ class ZohoSprintsService
     public function listItems(string $teamId, string $projectId, string $sprintId): array
     {
         return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/", [
-            'action'  => 'sprintitems',
+            'action' => 'sprintitems',
             'subitem' => 'true',
         ])->json();
     }
@@ -185,6 +185,25 @@ class ZohoSprintsService
     public function listModules(string $teamId): array
     {
         return $this->client()->get("/team/{$teamId}/settings/customization/modules/", ['action' => 'data'])->json();
+    }
+
+    // ──────────────────────────────────────────────────────────────────────────
+    // Project customization (statuses, item types, priorities)
+    // ──────────────────────────────────────────────────────────────────────────
+
+    public function listItemStatuses(string $teamId, string $projectId): array
+    {
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/itemstatus/", ['action' => 'data'])->json();
+    }
+
+    public function listItemTypes(string $teamId, string $projectId): array
+    {
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/itemtype/", ['action' => 'data'])->json();
+    }
+
+    public function listPriorities(string $teamId, string $projectId): array
+    {
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/priority/", ['action' => 'data'])->json();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -289,14 +308,26 @@ class ZohoSprintsService
     // Users / Members
     // ──────────────────────────────────────────────────────────────────────────
 
-    public function listTeamMembers(string $teamId): array
+    /**
+     * Zoho rejects this endpoint with a 500 "Parameter missing in Request" unless both
+     * `index` and `range` are sent, and its `index` is 1-based (unlike notes/comments).
+     */
+    public function listTeamMembers(string $teamId, int $index = 1, int $range = 100): array
     {
-        return $this->client()->get("/team/{$teamId}/users/", ['action' => 'data'])->json();
+        return $this->client()->get("/team/{$teamId}/users/", [
+            'action' => 'data',
+            'index' => $index,
+            'range' => $range,
+        ])->json();
     }
 
-    public function listProjectMembers(string $teamId, string $projectId): array
+    public function listProjectMembers(string $teamId, string $projectId, int $index = 1, int $range = 100): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/users/", ['action' => 'data'])->json();
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/users/", [
+            'action' => 'data',
+            'index' => $index,
+            'range' => $range,
+        ])->json();
     }
 
     // ──────────────────────────────────────────────────────────────────────────
