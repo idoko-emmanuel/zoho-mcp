@@ -15,10 +15,12 @@ class TeamTools
         return $this->sprints->listTeams();
     }
 
-    #[McpTool(name: 'zoho_list_team_members', description: 'List all members of a Zoho Sprints team.')]
+    #[McpTool(name: 'zoho_list_team_members', description: 'List all members of a Zoho Sprints team. Use index and range to paginate (default: first 100; index is 1-based).')]
     public function listTeamMembers(
         string $team_id,
+        int $index = 1,
+        int $range = 100,
     ): array {
-        return $this->sprints->listTeamMembers($team_id);
+        return $this->sprints->listTeamMembers($team_id, $index, $range);
     }
 }

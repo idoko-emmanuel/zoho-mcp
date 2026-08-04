@@ -13,9 +13,11 @@ Built with [php-mcp/laravel](https://github.com/php-mcp/laravel) and the [Model 
 
 ## Features
 
-- **27 MCP tools** covering the full Zoho Sprints API
+- **46 MCP tools** covering the full Zoho Sprints API
 - Full CRUD for **projects, sprints, items (tasks), epics, and comments**
-- Read access to **teams and members**
+- Read access to **teams and members**, and to a project's **statuses, item types and priorities**
+- **Compact item listing** that decodes Zoho's positional rows and drops the HTML descriptions —
+  ~85% smaller, so a whole sprint fits comfortably in context
 - Automatic **OAuth 2.0 token management** with silent refresh
 - Works with **Claude Code** (stdio) and **Claude Desktop** (HTTP)
 
@@ -29,6 +31,23 @@ Built with [php-mcp/laravel](https://github.com/php-mcp/laravel) and the [Model 
 | Items | `zoho_list_items`, `zoho_get_item`, `zoho_create_item`, `zoho_update_item`, `zoho_delete_item` |
 | Epics | `zoho_list_epics`, `zoho_get_epic`, `zoho_create_epic`, `zoho_update_epic`, `zoho_delete_epic` |
 | Comments | `zoho_list_comments`, `zoho_add_comment`, `zoho_update_comment`, `zoho_delete_comment` |
+| Workflow | `zoho_list_item_statuses`, `zoho_list_item_types`, `zoho_list_priorities` |
+| Identity | `zoho_whoami` |
+
+A few things worth knowing:
+
+- **Ids, not names.** Items carry statuses, types and priorities as opaque ids. The **Workflow**
+  tools resolve those ids to names — and give you the id to pass back to `zoho_update_item` to
+  move an item to, say, *In progress*.
+- **`zoho_list_items` accepts `compact: true`.** Zoho returns each item as a positional array
+  plus a `*_prop` name→index map, with the full HTML description inline. Compact mode decodes
+  the rows, resolves owner ids to names, and drops the descriptions — a real sprint goes from
+  ~30,000 to ~4,300 characters. Fetch the description for the one item you care about with
+  `zoho_get_item`.
+- **`zoho_whoami`** answers "which account is this server acting as", and with a `team_id`
+  resolves that account to its Sprints `zsUserId` — the value items carry as `ownerId`, so an
+  agent can tell which items are yours. It needs the `AaaServer.profile.READ` scope; if you
+  authorised before this tool existed, re-run the OAuth step at `/zoho/auth`.
 
 ---
 
