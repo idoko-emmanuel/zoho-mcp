@@ -1,16 +1,16 @@
 <?php
 
-use App\Models\ZohoToken;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     config([
-        'zoho.client_id'      => 'test-client-id',
-        'zoho.client_secret'  => 'test-client-secret',
-        'zoho.redirect_uri'   => 'http://localhost/zoho/callback',
-        'zoho.accounts_url'   => 'https://accounts.zoho.com',
+        'zoho.client_id' => 'test-client-id',
+        'zoho.client_secret' => 'test-client-secret',
+        'zoho.redirect_uri' => 'http://localhost/zoho/callback',
+        'zoho.accounts_url' => 'https://accounts.zoho.com',
         'zoho.sprints.scopes' => ['ZohoSprints.teams.READ'],
     ]);
 });
@@ -33,10 +33,10 @@ it('redirects to zoho authorization url', function () {
 it('exchanges code for token and returns success on callback', function () {
     Http::fake([
         'accounts.zoho.com/oauth/v2/token' => Http::response([
-            'access_token'  => 'access-xyz',
+            'access_token' => 'access-xyz',
             'refresh_token' => 'refresh-xyz',
-            'token_type'    => 'Bearer',
-            'expires_in'    => 3600,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
         ]),
     ]);
 
@@ -56,10 +56,10 @@ it('returns 422 when code is missing from callback', function () {
 it('returns json with expires_at on successful callback', function () {
     Http::fake([
         'accounts.zoho.com/oauth/v2/token' => Http::response([
-            'access_token'  => 'token-abc',
+            'access_token' => 'token-abc',
             'refresh_token' => 'refresh-abc',
-            'token_type'    => 'Bearer',
-            'expires_in'    => 3600,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
         ]),
     ]);
 

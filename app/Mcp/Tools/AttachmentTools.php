@@ -19,7 +19,7 @@ class AttachmentTools
         ?string $name = null,
     ): array {
         $data = array_filter([
-            'url'  => $url,
+            'url' => $url,
             'name' => $name,
         ]);
 

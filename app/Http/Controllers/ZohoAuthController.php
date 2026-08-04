@@ -27,7 +27,7 @@ class ZohoAuthController extends Controller
         $token = $this->auth->handleCallback($request->input('code'));
 
         return response()->json([
-            'message'    => 'Zoho authorisation successful. MCP server is ready.',
+            'message' => 'Zoho authorisation successful. MCP server is ready.',
             'expires_at' => $token->expires_at->toDateTimeString(),
         ]);
     }

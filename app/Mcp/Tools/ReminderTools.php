@@ -30,7 +30,7 @@ class ReminderTools
     ): array {
         $data = array_filter([
             'remindTime' => $remind_time,
-            'note'       => $note,
+            'note' => $note,
         ]);
 
         return $this->sprints->addItemReminder($team_id, $project_id, $sprint_id, $item_id, $data);
@@ -48,7 +48,7 @@ class ReminderTools
     ): array {
         $data = array_filter([
             'remindTime' => $remind_time,
-            'note'       => $note,
+            'note' => $note,
         ]);
 
         return $this->sprints->updateItemReminder($team_id, $project_id, $sprint_id, $item_id, $reminder_id, $data);

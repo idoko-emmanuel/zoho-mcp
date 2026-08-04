@@ -3,20 +3,21 @@
 use App\Models\ZohoToken;
 use App\Services\ZohoAuthService;
 use Composer\CaBundle\CaBundle;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Http;
 
-uses(\Illuminate\Foundation\Testing\RefreshDatabase::class);
+uses(RefreshDatabase::class);
 
 beforeEach(function () {
     config([
-        'zoho.client_id'      => 'test-client-id',
-        'zoho.client_secret'  => 'test-client-secret',
-        'zoho.redirect_uri'   => 'http://localhost/zoho/callback',
-        'zoho.accounts_url'   => 'https://accounts.zoho.com',
+        'zoho.client_id' => 'test-client-id',
+        'zoho.client_secret' => 'test-client-secret',
+        'zoho.redirect_uri' => 'http://localhost/zoho/callback',
+        'zoho.accounts_url' => 'https://accounts.zoho.com',
         'zoho.sprints.scopes' => ['ZohoSprints.teams.READ', 'ZohoSprints.projects.ALL'],
     ]);
-    $this->service = new ZohoAuthService();
+    $this->service = new ZohoAuthService;
 });
 
 // ──────────────────────────────────────────────────────────────────────────────
@@ -43,11 +44,11 @@ it('builds a valid authorization url', function () {
 it('persists tokens after a successful callback', function () {
     Http::fake([
         'accounts.zoho.com/oauth/v2/token' => Http::response([
-            'access_token'  => 'access-abc',
+            'access_token' => 'access-abc',
             'refresh_token' => 'refresh-abc',
-            'token_type'    => 'Bearer',
-            'expires_in'    => 3600,
-            'api_domain'    => 'https://www.zohoapis.com',
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
+            'api_domain' => 'https://www.zohoapis.com',
         ]),
     ]);
 
@@ -55,7 +56,7 @@ it('persists tokens after a successful callback', function () {
 
     expect($token->access_token)->toBe('access-abc');
     $this->assertDatabaseHas('zoho_tokens', [
-        'access_token'  => 'access-abc',
+        'access_token' => 'access-abc',
         'refresh_token' => 'refresh-abc',
     ]);
 });
@@ -71,19 +72,19 @@ it('throws when zoho returns an error on callback', function () {
 
 it('replaces old tokens on new callback', function () {
     ZohoToken::create([
-        'access_token'  => 'old-token',
+        'access_token' => 'old-token',
         'refresh_token' => 'old-refresh',
-        'token_type'    => 'Bearer',
-        'expires_in'    => 3600,
-        'expires_at'    => Carbon::now()->addHour(),
+        'token_type' => 'Bearer',
+        'expires_in' => 3600,
+        'expires_at' => Carbon::now()->addHour(),
     ]);
 
     Http::fake([
         'accounts.zoho.com/oauth/v2/token' => Http::response([
-            'access_token'  => 'new-token',
+            'access_token' => 'new-token',
             'refresh_token' => 'new-refresh',
-            'token_type'    => 'Bearer',
-            'expires_in'    => 3600,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
         ]),
     ]);
 
@@ -100,11 +101,11 @@ it('replaces old tokens on new callback', function () {
 
 it('returns a valid access token when not expired', function () {
     ZohoToken::create([
-        'access_token'  => 'still-valid',
+        'access_token' => 'still-valid',
         'refresh_token' => 'refresh-xyz',
-        'token_type'    => 'Bearer',
-        'expires_in'    => 3600,
-        'expires_at'    => Carbon::now()->addHour(),
+        'token_type' => 'Bearer',
+        'expires_in' => 3600,
+        'expires_at' => Carbon::now()->addHour(),
     ]);
 
     expect($this->service->getValidToken())->toBe('still-valid');
@@ -112,18 +113,18 @@ it('returns a valid access token when not expired', function () {
 
 it('silently refreshes an expired token', function () {
     ZohoToken::create([
-        'access_token'  => 'expired-token',
+        'access_token' => 'expired-token',
         'refresh_token' => 'my-refresh',
-        'token_type'    => 'Bearer',
-        'expires_in'    => 3600,
-        'expires_at'    => Carbon::now()->subMinute(),
+        'token_type' => 'Bearer',
+        'expires_in' => 3600,
+        'expires_at' => Carbon::now()->subMinute(),
     ]);
 
     Http::fake([
         'accounts.zoho.com/oauth/v2/token' => Http::response([
             'access_token' => 'refreshed-token',
-            'token_type'   => 'Bearer',
-            'expires_in'   => 3600,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
         ]),
     ]);
 
@@ -133,18 +134,18 @@ it('silently refreshes an expired token', function () {
 
 it('preserves the refresh token after a silent refresh', function () {
     ZohoToken::create([
-        'access_token'  => 'expired-token',
+        'access_token' => 'expired-token',
         'refresh_token' => 'keep-me',
-        'token_type'    => 'Bearer',
-        'expires_in'    => 3600,
-        'expires_at'    => Carbon::now()->subMinute(),
+        'token_type' => 'Bearer',
+        'expires_in' => 3600,
+        'expires_at' => Carbon::now()->subMinute(),
     ]);
 
     Http::fake([
         'accounts.zoho.com/oauth/v2/token' => Http::response([
             'access_token' => 'refreshed-token',
-            'token_type'   => 'Bearer',
-            'expires_in'   => 3600,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
             // Zoho does not return a new refresh_token on refresh
         ]),
     ]);
@@ -152,7 +153,7 @@ it('preserves the refresh token after a silent refresh', function () {
     $this->service->getValidToken();
 
     $this->assertDatabaseHas('zoho_tokens', [
-        'access_token'  => 'refreshed-token',
+        'access_token' => 'refreshed-token',
         'refresh_token' => 'keep-me',
     ]);
 });
@@ -177,10 +178,10 @@ it('resolves a readable ca bundle for ssl verification', function () {
 it('sends token exchange request successfully with ca bundle configured', function () {
     Http::fake([
         'accounts.zoho.com/oauth/v2/token' => Http::response([
-            'access_token'  => 'ssl-test-token',
+            'access_token' => 'ssl-test-token',
             'refresh_token' => 'ssl-refresh',
-            'token_type'    => 'Bearer',
-            'expires_in'    => 3600,
+            'token_type' => 'Bearer',
+            'expires_in' => 3600,
         ]),
     ]);
 

@@ -29,8 +29,8 @@ class LinkedItemTools
         string $linked_item_id,
     ): array {
         return $this->sprints->linkItems($team_id, $project_id, $sprint_id, $item_id, [
-            'linkTypeId'    => $link_type_id,
-            'linkedItemId'  => $linked_item_id,
+            'linkTypeId' => $link_type_id,
+            'linkedItemId' => $linked_item_id,
         ]);
     }
 }
