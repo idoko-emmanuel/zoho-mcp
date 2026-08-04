@@ -40,12 +40,12 @@ class ZohoSprintsService
 
     public function createProject(string $teamId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/", $data);
     }
 
     public function updateProject(string $teamId, string $projectId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/", $data);
     }
 
     public function deleteProject(string $teamId, string $projectId): array
@@ -73,12 +73,12 @@ class ZohoSprintsService
 
     public function createSprint(string $teamId, string $projectId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/", $data);
     }
 
     public function updateSprint(string $teamId, string $projectId, string $sprintId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/", $data);
     }
 
     public function deleteSprint(string $teamId, string $projectId, string $sprintId): array
@@ -105,12 +105,12 @@ class ZohoSprintsService
 
     public function createItem(string $teamId, string $projectId, string $sprintId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/", $data);
     }
 
     public function updateItem(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/", $data);
     }
 
     public function deleteItem(string $teamId, string $projectId, string $sprintId, string $itemId): array
@@ -134,12 +134,12 @@ class ZohoSprintsService
 
     public function createEpic(string $teamId, string $projectId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/epic/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/epic/", $data);
     }
 
     public function updateEpic(string $teamId, string $projectId, string $epicId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/epic/{$epicId}/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/epic/{$epicId}/", $data);
     }
 
     public function deleteEpic(string $teamId, string $projectId, string $epicId): array
@@ -161,16 +161,16 @@ class ZohoSprintsService
 
     public function addComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $content): array
     {
-        return $this->client()->asForm()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/", [
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/", [
             'name' => $content,
-        ])->json();
+        ]);
     }
 
     public function updateComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $notesId, string $content): array
     {
-        return $this->client()->asForm()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/{$notesId}/", [
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/notes/{$notesId}/", [
             'name' => $content,
-        ])->json();
+        ]);
     }
 
     public function deleteComment(string $teamId, string $projectId, string $sprintId, string $itemId, string $notesId): array
@@ -212,7 +212,7 @@ class ZohoSprintsService
 
     public function createSubitem(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/subitem/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/subitem/", $data);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -221,7 +221,7 @@ class ZohoSprintsService
 
     public function addItemAttachment(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/attachments/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/attachments/", $data);
     }
 
     public function deleteItemAttachment(string $teamId, string $projectId, string $sprintId, string $itemId, string $attachmentId): array
@@ -240,7 +240,7 @@ class ZohoSprintsService
 
     public function linkItems(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/linkitem/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/linkitem/", $data);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -254,7 +254,7 @@ class ZohoSprintsService
 
     public function updateItemTags(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/tags/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/tags/", $data);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -268,7 +268,7 @@ class ZohoSprintsService
 
     public function updateItemFollowers(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/followers/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/followers/", $data);
     }
 
     // ──────────────────────────────────────────────────────────────────────────
@@ -282,12 +282,12 @@ class ZohoSprintsService
 
     public function addItemReminder(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/reminder/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/reminder/", $data);
     }
 
     public function updateItemReminder(string $teamId, string $projectId, string $sprintId, string $itemId, string $reminderId, array $data): array
     {
-        return $this->client()->post("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/reminder/{$reminderId}/", $data)->json();
+        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/reminder/{$reminderId}/", $data);
     }
 
     public function deleteItemReminder(string $teamId, string $projectId, string $sprintId, string $itemId, string $reminderId): array
@@ -333,6 +333,16 @@ class ZohoSprintsService
     // ──────────────────────────────────────────────────────────────────────────
     // Helpers
     // ──────────────────────────────────────────────────────────────────────────
+
+    /**
+     * Zoho's write endpoints expect application/x-www-form-urlencoded. A JSON body is
+     * accepted and then silently ignored: the call returns {"status":"success"} while
+     * nothing changes. Every write goes through here so that cannot happen again.
+     */
+    private function postForm(string $path, array $data): array
+    {
+        return $this->client()->asForm()->post($path, $data)->json();
+    }
 
     private function client(): PendingRequest
     {

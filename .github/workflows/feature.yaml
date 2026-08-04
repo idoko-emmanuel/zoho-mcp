@@ -3,6 +3,9 @@ on:
         branches:
             - feature/**
             - feat/**
+    # Without this, only branches named feature/** or feat/** are ever checked:
+    # a fix/** or chore/** PR merges with no lint and no tests at all.
+    pull_request:
 name: 'Deploy feature'
 env:
     PHP_VERSION: '8.3'

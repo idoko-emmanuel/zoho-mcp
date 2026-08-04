@@ -430,3 +430,53 @@ it('sends the bearer token on every request', function () {
     Http::assertSent(fn ($req) => $req->hasHeader('Authorization', 'Bearer fake-token')
     );
 });
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Write encoding
+//
+// Zoho accepts a JSON body on its write endpoints and silently ignores it — the
+// response is {"status":"success"} and nothing changes. Asserting only the URL,
+// as the tests above do, cannot tell the two apart. These assert the encoding.
+// ──────────────────────────────────────────────────────────────────────────────
+
+$writes = [
+    'updateItem' => fn ($s) => $s->updateItem('team1', 'proj1', 'sprint1', 'item1', ['status' => 'st1']),
+    'createItem' => fn ($s) => $s->createItem('team1', 'proj1', 'sprint1', ['name' => 'New']),
+    'createSubitem' => fn ($s) => $s->createSubitem('team1', 'proj1', 'sprint1', 'item1', ['name' => 'Sub']),
+    'createProject' => fn ($s) => $s->createProject('team1', ['name' => 'P']),
+    'updateProject' => fn ($s) => $s->updateProject('team1', 'proj1', ['name' => 'P']),
+    'createSprint' => fn ($s) => $s->createSprint('team1', 'proj1', ['name' => 'S']),
+    'updateSprint' => fn ($s) => $s->updateSprint('team1', 'proj1', 'sprint1', ['name' => 'S']),
+    'createEpic' => fn ($s) => $s->createEpic('team1', 'proj1', ['name' => 'E']),
+    'updateEpic' => fn ($s) => $s->updateEpic('team1', 'proj1', 'epic1', ['name' => 'E']),
+    'addComment' => fn ($s) => $s->addComment('team1', 'proj1', 'sprint1', 'item1', 'hi'),
+    'updateComment' => fn ($s) => $s->updateComment('team1', 'proj1', 'sprint1', 'item1', 'note1', 'hi'),
+    'addItemAttachment' => fn ($s) => $s->addItemAttachment('team1', 'proj1', 'sprint1', 'item1', ['url' => 'https://e.com/a.png']),
+    'linkItems' => fn ($s) => $s->linkItems('team1', 'proj1', 'sprint1', 'item1', ['linkItemId' => 'i2']),
+    'updateItemTags' => fn ($s) => $s->updateItemTags('team1', 'proj1', 'sprint1', 'item1', ['tagId' => 't1']),
+    'updateItemFollowers' => fn ($s) => $s->updateItemFollowers('team1', 'proj1', 'sprint1', 'item1', ['userIds' => 'u1']),
+    'addItemReminder' => fn ($s) => $s->addItemReminder('team1', 'proj1', 'sprint1', 'item1', ['remindAt' => 'x']),
+    'updateItemReminder' => fn ($s) => $s->updateItemReminder('team1', 'proj1', 'sprint1', 'item1', 'r1', ['remindAt' => 'x']),
+];
+
+foreach ($writes as $name => $call) {
+    it("form-encodes the body of {$name}", function () use ($call) {
+        Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
+
+        $call($this->service);
+
+        Http::assertSent(fn ($req) => $req->method() === 'POST' &&
+            $req->hasHeader('Content-Type', 'application/x-www-form-urlencoded')
+        );
+    });
+}
+
+it('sends the status field as form data when moving an item', function () {
+    Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
+
+    $this->service->updateItem('team1', 'proj1', 'sprint1', 'item1', ['status' => 'status-code-review']);
+
+    Http::assertSent(fn ($req) => $req->data()['status'] === 'status-code-review' &&
+        $req->body() === 'status=status-code-review'
+    );
+});
