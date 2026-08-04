@@ -98,3 +98,78 @@ it('compacts an empty sprint without error', function () {
 
     expect($this->tools->listItems('t', 'p', 's', compact: true))->toBe(['items' => [], 'count' => 0]);
 });
+
+// ──────────────────────────────────────────────────────────────────────────────
+// Field names
+//
+// Zoho validates parameter names strictly — an unrecognised key comes back as
+// `7602 Extra parameter found in URL`, not silently ignored. `status` was one of
+// those, which is why moving an item never worked.
+// ──────────────────────────────────────────────────────────────────────────────
+
+/** Capture the payload the tool hands to the service. */
+function captureItemPayload($sprints, string $method): callable
+{
+    $captured = new stdClass;
+    $captured->data = null;
+
+    $sprints->shouldReceive($method)->andReturnUsing(function (...$args) use ($captured) {
+        $captured->data = end($args);
+
+        return ['status' => 'success'];
+    });
+
+    return fn () => $captured->data;
+}
+
+it('sends status as statusid when moving an item', function () {
+    $payload = captureItemPayload($this->sprints, 'updateItem');
+
+    $this->tools->updateItem('t', 'p', 's', 'i', status_id: 'status-code-review');
+
+    expect($payload())->toBe(['statusid' => 'status-code-review']);
+});
+
+it('maps every update field to the name Zoho documents', function () {
+    $payload = captureItemPayload($this->sprints, 'updateItem');
+
+    $this->tools->updateItem(
+        't', 'p', 's', 'i',
+        name: 'N', description: 'D', status_id: 'st', priority_id: 'pr',
+        item_type_id: 'ty', start_date: '2026-08-01', end_date: '2026-08-09',
+        epic_id: 'ep', points: 3,
+    );
+
+    expect(array_keys($payload()))->toBe([
+        'name', 'description', 'statusid', 'projpriorityid',
+        'projitemtypeid', 'startdate', 'enddate', 'epicid', 'point',
+    ]);
+});
+
+it('omits fields that were not supplied rather than sending empty keys', function () {
+    $payload = captureItemPayload($this->sprints, 'updateItem');
+
+    $this->tools->updateItem('t', 'p', 's', 'i', name: 'Renamed');
+
+    expect($payload())->toBe(['name' => 'Renamed']);
+});
+
+it('maps create fields to the documented names', function () {
+    $payload = captureItemPayload($this->sprints, 'createItem');
+
+    $this->tools->createItem('t', 'p', 's', 'New item', item_type_id: 'ty', priority_id: 'pr');
+
+    expect($payload())->toBe([
+        'name' => 'New item',
+        'projitemtypeid' => 'ty',
+        'projpriorityid' => 'pr',
+    ]);
+});
+
+it('keeps a zero point value, which a plain array_filter would have dropped', function () {
+    $payload = captureItemPayload($this->sprints, 'updateItem');
+
+    $this->tools->updateItem('t', 'p', 's', 'i', points: 0);
+
+    expect($payload())->toBe(['point' => 0]);
+});

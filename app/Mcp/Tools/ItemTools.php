@@ -72,31 +72,31 @@ class ItemTools
         return $this->sprints->getItem($team_id, $project_id, $sprint_id, $item_id);
     }
 
-    #[McpTool(name: 'zoho_create_item', description: 'Create a new item (task) inside a sprint.')]
+    #[McpTool(name: 'zoho_create_item', description: 'Create a new item (task) inside a sprint. Zoho requires item_type_id and priority_id on create — get them from zoho_list_item_types and zoho_list_priorities.')]
     public function createItem(
         string $team_id,
         string $project_id,
         string $sprint_id,
         string $name,
+        ?string $item_type_id = null,
+        ?string $priority_id = null,
         ?string $description = null,
-        ?string $assignee = null,
-        ?string $priority = null,
-        ?string $due_date = null,
+        ?string $end_date = null,
         ?string $epic_id = null,
+        ?int $points = null,
     ): array {
-        $data = array_filter([
+        return $this->sprints->createItem($team_id, $project_id, $sprint_id, $this->itemPayload([
             'name' => $name,
+            'projitemtypeid' => $item_type_id,
+            'projpriorityid' => $priority_id,
             'description' => $description,
-            'assignee' => $assignee,
-            'priority' => $priority,
-            'duedate' => $due_date,
-            'epic' => $epic_id,
-        ]);
-
-        return $this->sprints->createItem($team_id, $project_id, $sprint_id, $data);
+            'enddate' => $end_date,
+            'epicid' => $epic_id,
+            'point' => $points,
+        ]));
     }
 
-    #[McpTool(name: 'zoho_update_item', description: 'Update an existing item (task) — name, description, assignee, priority, status, due date, or epic.')]
+    #[McpTool(name: 'zoho_update_item', description: 'Update an existing item (task) — name, description, status, priority, item type, dates, epic or points. Pass status_id from zoho_list_item_statuses to move an item between statuses.')]
     public function updateItem(
         string $team_id,
         string $project_id,
@@ -104,23 +104,38 @@ class ItemTools
         string $item_id,
         ?string $name = null,
         ?string $description = null,
-        ?string $assignee = null,
-        ?string $priority = null,
-        ?string $status = null,
-        ?string $due_date = null,
+        ?string $status_id = null,
+        ?string $priority_id = null,
+        ?string $item_type_id = null,
+        ?string $start_date = null,
+        ?string $end_date = null,
         ?string $epic_id = null,
+        ?int $points = null,
     ): array {
-        $data = array_filter([
+        return $this->sprints->updateItem($team_id, $project_id, $sprint_id, $item_id, $this->itemPayload([
             'name' => $name,
             'description' => $description,
-            'assignee' => $assignee,
-            'priority' => $priority,
-            'status' => $status,
-            'duedate' => $due_date,
-            'epic' => $epic_id,
-        ]);
+            'statusid' => $status_id,
+            'projpriorityid' => $priority_id,
+            'projitemtypeid' => $item_type_id,
+            'startdate' => $start_date,
+            'enddate' => $end_date,
+            'epicid' => $epic_id,
+            'point' => $points,
+        ]));
+    }
 
-        return $this->sprints->updateItem($team_id, $project_id, $sprint_id, $item_id, $data);
+    /**
+     * Zoho validates parameter names strictly: an unrecognised one is rejected with
+     * `7602 Extra parameter found in URL` rather than ignored. Only send what was
+     * actually supplied, and never invent a key.
+     *
+     * @param  array<string, mixed>  $data
+     * @return array<string, mixed>
+     */
+    private function itemPayload(array $data): array
+    {
+        return array_filter($data, fn ($value) => $value !== null && $value !== '');
     }
 
     #[McpTool(name: 'zoho_delete_item', description: 'Delete an item (task) from a sprint.')]
@@ -140,19 +155,17 @@ class ItemTools
         string $sprint_id,
         string $item_id,
         string $name,
+        ?string $item_type_id = null,
+        ?string $priority_id = null,
         ?string $description = null,
-        ?string $assignee = null,
-        ?string $priority = null,
-        ?string $due_date = null,
+        ?string $end_date = null,
     ): array {
-        $data = array_filter([
+        return $this->sprints->createSubitem($team_id, $project_id, $sprint_id, $item_id, $this->itemPayload([
             'name' => $name,
+            'projitemtypeid' => $item_type_id,
+            'projpriorityid' => $priority_id,
             'description' => $description,
-            'assignee' => $assignee,
-            'priority' => $priority,
-            'duedate' => $due_date,
-        ]);
-
-        return $this->sprints->createSubitem($team_id, $project_id, $sprint_id, $item_id, $data);
+            'enddate' => $end_date,
+        ]));
     }
 }
