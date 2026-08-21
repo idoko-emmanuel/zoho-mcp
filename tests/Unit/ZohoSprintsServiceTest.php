@@ -242,6 +242,7 @@ it('calls the correct url to get linked items', function () {
     $this->service->getLinkedItems('team1', 'proj1', 'sprint1', 'item1');
 
     Http::assertSent(fn ($req) => str_contains($req->url(), '/item/item1/linkitem/')
+        && str_contains($req->url(), 'action=data')
     );
 });
 
@@ -287,17 +288,21 @@ it('calls the correct url to get item followers', function () {
 
     $this->service->getItemFollowers('team1', 'proj1', 'sprint1', 'item1');
 
+    // The action is mandatory — without it Zoho answers 404 "Given URL is
+    // wrong", which is why asserting on the path alone missed the bug.
     Http::assertSent(fn ($req) => str_contains($req->url(), '/item/item1/followers/')
+        && str_contains($req->url(), 'action=getfollowers')
     );
 });
 
 it('posts to the followers url when updating followers', function () {
     Http::fake(['sprintsapi.zoho.com/*' => Http::response(['status' => 'success'])]);
 
-    $this->service->updateItemFollowers('team1', 'proj1', 'sprint1', 'item1', ['action' => 'add', 'userIds' => 'u1']);
+    $this->service->updateItemFollowers('team1', 'proj1', 'sprint1', 'item1', ['userIds' => 'u1']);
 
     Http::assertSent(fn ($req) => $req->method() === 'POST' &&
         str_contains($req->url(), '/item/item1/followers/')
+        && str_contains($req->url(), 'action=updatefollowers')
     );
 });
 
