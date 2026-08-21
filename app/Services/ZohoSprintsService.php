@@ -235,7 +235,11 @@ class ZohoSprintsService
 
     public function getLinkedItems(string $teamId, string $projectId, string $sprintId, string $itemId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/linkitem/")->json();
+        // As with followers, Zoho needs an explicit action or it answers
+        // 404 "Given URL is wrong".
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/linkitem/", [
+            'action' => 'data',
+        ])->json();
     }
 
     public function linkItems(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
@@ -263,12 +267,34 @@ class ZohoSprintsService
 
     public function getItemFollowers(string $teamId, string $projectId, string $sprintId, string $itemId): array
     {
-        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/followers/")->json();
+        // Zoho requires an explicit action here; without it the API answers
+        // 404 "Given URL is wrong" rather than a missing-parameter error.
+        return $this->client()->get("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/followers/", [
+            'action' => 'getfollowers',
+        ])->json();
     }
 
+    /**
+     * KNOWN BROKEN — the payload contract is unresolved.
+     *
+     * 'updatefollowers' is the correct action: 'add'/'addfollowers' are
+     * rejected with 404 "Given URL is wrong", while this one reaches the
+     * handler. The parameter is 'userIds' — omitting it returns 500 "Given
+     * userIds are invalid." But supplying it in any position or encoding
+     * (form body, query string, JSON, multipart, repeated userIds[], both the
+     * Sprints user id and the ZUID) is rejected with 400 "Extra parameter
+     * found in URL". Zoho therefore demands a parameter it will not accept,
+     * and the endpoint is undocumented publicly.
+     *
+     * Callers should expect this to throw. Add followers in the Zoho UI until
+     * the real contract is known.
+     */
     public function updateItemFollowers(string $teamId, string $projectId, string $sprintId, string $itemId, array $data): array
     {
-        return $this->postForm("/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/followers/", $data);
+        return $this->postForm(
+            "/team/{$teamId}/projects/{$projectId}/sprints/{$sprintId}/item/{$itemId}/followers/?action=updatefollowers",
+            $data
+        );
     }
 
     // ──────────────────────────────────────────────────────────────────────────
