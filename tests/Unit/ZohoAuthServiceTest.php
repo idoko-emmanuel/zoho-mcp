@@ -163,6 +163,40 @@ it('throws when no token has been stored yet', function () {
         ->toThrow(RuntimeException::class, 'No Zoho token found');
 });
 
+it('starts the plugin auth server and points to the fallback when no token is stored', function () {
+    $dir = sys_get_temp_dir().'/zoho-mcp-plugin-'.uniqid();
+    mkdir($dir);
+    $marker = $dir.'/started';
+    file_put_contents($dir.'/auth-server.sh', "#!/usr/bin/env bash\necho \"\$1\" > ".escapeshellarg($marker)."\n");
+    config(['zoho.plugin_scripts' => $dir]);
+
+    try {
+        expect(fn () => $this->service->getValidToken())
+            ->toThrow(RuntimeException::class, '/zoho-mcp:connect');
+
+        // The launcher runs in the background, so give it a moment
+        for ($i = 0; $i < 50 && ! is_file($marker); $i++) {
+            usleep(100_000);
+        }
+
+        expect(trim((string) @file_get_contents($marker)))->toBe('start');
+    } finally {
+        @unlink($marker);
+        @unlink($dir.'/auth-server.sh');
+        @rmdir($dir);
+    }
+});
+
+it('does not mention the plugin outside the Claude Code plugin', function () {
+    config(['zoho.plugin_scripts' => null]);
+
+    try {
+        $this->service->getValidToken();
+    } catch (RuntimeException $e) {
+        expect($e->getMessage())->not->toContain('/zoho-mcp:connect');
+    }
+});
+
 // ──────────────────────────────────────────────────────────────────────────────
 // SSL / CA bundle
 // ──────────────────────────────────────────────────────────────────────────────
