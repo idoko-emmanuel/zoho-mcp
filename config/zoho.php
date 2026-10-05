@@ -16,6 +16,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Claude Code plugin
+    |--------------------------------------------------------------------------
+    | Set by the plugin's serve.sh. When present and no token is saved, the
+    | server starts the local OAuth server in the background so the link in
+    | the "No Zoho token found" error works without any extra steps.
+    */
+
+    'plugin_scripts' => env('ZOHO_MCP_PLUGIN_SCRIPTS'),
+
+    /*
+    |--------------------------------------------------------------------------
     | Zoho Accounts URL
     |--------------------------------------------------------------------------
     | Use the data centre matching your Zoho account region:
