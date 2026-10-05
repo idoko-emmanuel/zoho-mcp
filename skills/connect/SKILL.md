@@ -1,0 +1,67 @@
+---
+name: connect
+description: Connect (or reconnect) the Zoho Sprints MCP server to a Zoho account by running the one-time OAuth flow. Use when the user asks to connect or authorise Zoho, or when a zoho_* tool fails with "No Zoho token found" or an INVALID_OAUTHSCOPE error.
+---
+
+# Connect Zoho Sprints
+
+The Zoho Sprints tools need a one-time OAuth authorisation. Tokens are saved in the plugin's
+data directory and refresh automatically afterwards, so this only has to be done once (or again
+after the user revokes access or the server gains new scopes).
+
+The app lives in `${CLAUDE_PLUGIN_DATA}/app`. Follow these steps in order.
+
+## 1. Make sure the app is set up
+
+Run:
+
+```bash
+CLAUDE_PLUGIN_ROOT="${CLAUDE_PLUGIN_ROOT}" CLAUDE_PLUGIN_DATA="${CLAUDE_PLUGIN_DATA}" bash "${CLAUDE_PLUGIN_ROOT}/scripts/claude-plugin/setup.sh"
+```
+
+If it fails, show the user the last 30 lines of `${CLAUDE_PLUGIN_DATA}/setup.log` and stop.
+
+## 2. Check that credentials are configured
+
+Run:
+
+```bash
+grep -E '^ZOHO_CLIENT_(ID|SECRET)=' "${CLAUDE_PLUGIN_DATA}/app/.env" | sed -E 's/=.+/=<set>/'
+```
+
+If either value is empty, tell the user to set the Client ID and Secret by running `/plugin`,
+opening **zoho-mcp**, and choosing **Configure**, then to start a new session and run this
+command again. Stop here.
+
+## 3. Start the local auth server
+
+Zoho redirects to `http://localhost:8000/zoho/callback`, so the server must listen on port 8000.
+Start it **in the background**:
+
+```bash
+php "${CLAUDE_PLUGIN_DATA}/app/artisan" serve --host=127.0.0.1 --port=8000
+```
+
+If port 8000 is already in use, tell the user to free it and stop.
+
+## 4. Have the user authorise
+
+Tell the user to:
+
+1. Open **http://localhost:8000/zoho/auth** in their browser.
+2. Approve the permissions in Zoho.
+3. Reply once the page shows "Zoho authorisation successful".
+
+Wait for their reply.
+
+## 5. Confirm and clean up
+
+Check that a token was saved:
+
+```bash
+php "${CLAUDE_PLUGIN_DATA}/app/artisan" tinker --execute='echo App\Models\ZohoToken::count();'
+```
+
+A result of `1` means it worked. Stop the background server, then tell the user they're
+connected and can try something like "List my Zoho Sprints teams". If the count is `0`, show
+the end of `${CLAUDE_PLUGIN_DATA}/app/storage/logs/laravel.log` and help them retry.
