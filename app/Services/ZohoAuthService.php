@@ -71,9 +71,7 @@ class ZohoAuthService
         $token = ZohoToken::latest()->first();
 
         if (! $token) {
-            throw new RuntimeException(
-                'No Zoho token found. Visit '.url('/zoho/auth').' to authorise.'
-            );
+            throw new RuntimeException($this->missingTokenMessage());
         }
 
         if ($token->isExpired()) {
@@ -161,5 +159,25 @@ class ZohoAuthService
                 "Zoho {$context} failed: ".($response->json()['error'] ?? $response->body())
             );
         }
+    }
+
+    /**
+     * Explain how to authorise. Under the Claude Code plugin, this also makes sure the
+     * local OAuth server is running, so the link works straight away.
+     */
+    private function missingTokenMessage(): string
+    {
+        $message = 'No Zoho token found. Visit '.url('/zoho/auth').' to authorise.';
+
+        $scripts = config('zoho.plugin_scripts');
+
+        if (! $scripts || ! is_file($scripts.'/auth-server.sh')) {
+            return $message;
+        }
+
+        // Detached and silent: stdout is the MCP stdio channel.
+        exec('bash '.escapeshellarg($scripts.'/auth-server.sh').' start </dev/null >/dev/null 2>&1 &');
+
+        return $message.' Open that link in your browser and approve access in Zoho; the tools work as soon as you do, with no restart. If the page does not load, run /zoho-mcp:connect.';
     }
 }
