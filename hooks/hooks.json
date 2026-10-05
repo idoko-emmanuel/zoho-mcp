@@ -5,7 +5,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/claude-plugin/setup.sh\"",
+            "command": "bash \"${CLAUDE_PLUGIN_ROOT}/scripts/claude-plugin/session-start.sh\"",
             "timeout": 600
           }
         ]
