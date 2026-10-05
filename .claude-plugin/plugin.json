@@ -1,0 +1,36 @@
+{
+  "name": "zoho-mcp",
+  "displayName": "Zoho Sprints",
+  "version": "1.0.0",
+  "description": "Manage Zoho Sprints teams, projects, sprints, items, epics and comments from Claude Code (46 MCP tools).",
+  "author": {
+    "name": "Idoko Emmanuel",
+    "url": "https://github.com/idoko-emmanuel"
+  },
+  "homepage": "https://github.com/idoko-emmanuel/zoho-mcp",
+  "repository": "https://github.com/idoko-emmanuel/zoho-mcp",
+  "license": "MIT",
+  "keywords": ["zoho", "zoho-sprints", "mcp", "project-management", "agile"],
+  "userConfig": {
+    "client_id": {
+      "type": "string",
+      "title": "Zoho Client ID",
+      "description": "From api-console.zoho.com, Server-based Application. Redirect URI must be http://localhost:8000/zoho/callback",
+      "required": true
+    },
+    "client_secret": {
+      "type": "string",
+      "title": "Zoho Client Secret",
+      "description": "From the same Zoho API console app",
+      "required": true,
+      "sensitive": true
+    },
+    "region": {
+      "type": "string",
+      "title": "Zoho data centre",
+      "description": "Region of your Zoho account: com (US), eu, in or com.au",
+      "options": ["com", "eu", "in", "com.au"],
+      "default": "com"
+    }
+  }
+}
