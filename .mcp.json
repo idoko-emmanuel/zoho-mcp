@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "sprints": {
+      "command": "bash",
+      "args": ["${CLAUDE_PLUGIN_ROOT}/scripts/claude-plugin/serve.sh"],
+      "env": {
+        "ZOHO_CLIENT_ID": "${user_config.client_id}",
+        "ZOHO_CLIENT_SECRET": "${user_config.client_secret}",
+        "ZOHO_REGION": "${user_config.region}"
+      }
+    }
+  }
+}
