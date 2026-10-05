@@ -1,0 +1,17 @@
+{
+  "name": "idoko-emmanuel",
+  "description": "Claude Code plugins by Idoko Emmanuel",
+  "owner": {
+    "name": "Idoko Emmanuel",
+    "url": "https://github.com/idoko-emmanuel"
+  },
+  "plugins": [
+    {
+      "name": "zoho-mcp",
+      "source": "./",
+      "description": "Zoho Sprints MCP server: teams, projects, sprints, items, epics and comments",
+      "category": "productivity",
+      "tags": ["zoho", "sprints", "mcp"]
+    }
+  ]
+}
