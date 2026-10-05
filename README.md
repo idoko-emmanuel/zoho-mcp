@@ -65,35 +65,48 @@ A few things worth knowing:
 
 ### Claude Code plugin (recommended)
 
-Inside Claude Code, run:
+**In the Claude Code CLI**, run:
 
 ```text
 /plugin marketplace add idoko-emmanuel/zoho-mcp
 /plugin install zoho-mcp@idoko-emmanuel
 ```
 
-Claude Code asks for your **Zoho Client ID**, **Client Secret** and **data centre** (see
-[Register your OAuth app](#1-register-your-oauth-app)). The secret is kept in your system's
-secure credential store. To change them later, run `/plugin`, open **zoho-mcp** and choose
-**Configure**.
-
-Then start a new session and run:
+**In VS Code**, open this link (paste it into your browser's address bar):
 
 ```text
-/zoho-mcp:connect
+vscode://anthropic.claude-code/install-plugin?plugin=zoho-mcp&marketplace=idoko-emmanuel/zoho-mcp
 ```
 
-Claude starts a local auth server and walks you through the one-time Zoho OAuth step. After
-that, try *"List all my Zoho Sprints teams"*.
+Or type `/plugins` in the Claude Code panel, add `idoko-emmanuel/zoho-mcp` on the **Marketplaces**
+tab, then install **zoho-mcp** from the **Plugins** tab.
 
-**Requirements:** PHP 8.3+ and `bash` on your `PATH` (on Windows, Git Bash or WSL). Composer is
-downloaded automatically if you don't have it.
+Claude Code asks for your **Zoho Client ID**, **Client Secret** and **data centre** (see
+[Register your OAuth app](#1-register-your-oauth-app)). To change them later, run `/plugin`
+(`/plugins` in VS Code), open **zoho-mcp** and choose **Configure**.
 
-**How it works:** the first session runs `composer install` and sets up the app (about a
-minute). If the `sprints` server shows as failed in `/mcp` during that first run, reconnect it
-once setup finishes. The app, its SQLite database and your OAuth tokens live in
-`~/.claude/plugins/data/zoho-mcp-idoko-emmanuel/`, so they survive plugin updates. Setup logs
-go to `setup.log` in that folder.
+**Connect your Zoho account:** start a new session. Until Zoho is authorised, the plugin runs a
+small local auth server and shows you a link:
+
+> Zoho Sprints isn't connected yet. Open http://localhost:8000/zoho/auth to authorise it (one time only).
+
+Open it, approve access in Zoho, and you're done: no restart needed. The auth server stops by
+itself once the token is saved (or after 30 minutes). Then try *"List all my Zoho Sprints teams"*.
+If the link doesn't load, or you need to re-authorise later, run `/zoho-mcp:connect` and Claude
+walks you through it.
+
+**Requirements:** PHP 8.3+ and `bash` on your `PATH` (on Windows, Git Bash or WSL), and port 8000
+free while you authorise. Composer is downloaded automatically if you don't have it.
+
+**How it works:** the first session runs `composer install` and sets up the app, which takes 2 to
+3 minutes, so Claude's first reply waits for it. If the `sprints` server shows as failed in `/mcp`
+during that first run, reconnect it once setup finishes. The app, its SQLite database and your
+OAuth tokens live in `~/.claude/plugins/data/zoho-mcp-idoko-emmanuel/`, so they survive plugin
+updates. Setup logs go to `setup.log` in that folder.
+
+**Where your secret is stored:** Claude Code keeps the Client Secret in your system's secure
+credential store. The plugin also writes it to the app's `.env` file in the folder above
+(readable only by your user), because the local auth server needs it to complete the OAuth step.
 
 > Already installed with `install.sh`? Remove the old registration so the tools don't appear
 > twice: `claude mcp remove zoho-sprints --scope user`
