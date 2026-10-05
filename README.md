@@ -63,7 +63,42 @@ A few things worth knowing:
 
 ## Installation
 
-### macOS / Linux — One-line install (recommended)
+### Claude Code plugin (recommended)
+
+Inside Claude Code, run:
+
+```text
+/plugin marketplace add idoko-emmanuel/zoho-mcp
+/plugin install zoho-mcp@idoko-emmanuel
+```
+
+Claude Code asks for your **Zoho Client ID**, **Client Secret** and **data centre** (see
+[Register your OAuth app](#1-register-your-oauth-app)). The secret is kept in your system's
+secure credential store. To change them later, run `/plugin`, open **zoho-mcp** and choose
+**Configure**.
+
+Then start a new session and run:
+
+```text
+/zoho-mcp:connect
+```
+
+Claude starts a local auth server and walks you through the one-time Zoho OAuth step. After
+that, try *"List all my Zoho Sprints teams"*.
+
+**Requirements:** PHP 8.3+ and `bash` on your `PATH` (on Windows, Git Bash or WSL). Composer is
+downloaded automatically if you don't have it.
+
+**How it works:** the first session runs `composer install` and sets up the app (about a
+minute). If the `sprints` server shows as failed in `/mcp` during that first run, reconnect it
+once setup finishes. The app, its SQLite database and your OAuth tokens live in
+`~/.claude/plugins/data/zoho-mcp-idoko-emmanuel/`, so they survive plugin updates. Setup logs
+go to `setup.log` in that folder.
+
+> Already installed with `install.sh`? Remove the old registration so the tools don't appear
+> twice: `claude mcp remove zoho-sprints --scope user`
+
+### macOS / Linux — One-line install
 
 The install script checks for PHP 8.3+, installs Composer if missing, clones the repo, sets up the database, prompts for your Zoho credentials, and registers the MCP server with Claude Code automatically.
 
