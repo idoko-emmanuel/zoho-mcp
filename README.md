@@ -134,6 +134,13 @@ the plugin is already connected with `php artisan zoho:refresh-token` (run in th
 folder). A fresh session then signs in from it on first use. The token acts as the Zoho user who
 issued it, so put it in a **personal** cloud environment, never in one the team shares.
 
+A shared environment can instead hold one token per person, named after their GitHub login:
+`ZOHO_REFRESH_TOKEN_<LOGIN>`, uppercased with anything other than letters and digits turned into
+`_` (GitHub `idoko-emmanuel` → `ZOHO_REFRESH_TOKEN_IDOKO_EMMANUEL`). Each cloud session looks up
+the signed-in GitHub user and uses their token; people without one get the
+`/zoho-mcp:connect` flow. Anyone who can use the environment can read every token in it, so only
+do this within a team that accepts that.
+
 ### macOS / Linux — One-line install
 
 The install script checks for PHP 8.3+, installs Composer if missing, clones the repo, sets up the database, prompts for your Zoho credentials, and registers the MCP server with Claude Code automatically.
