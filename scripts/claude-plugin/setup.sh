@@ -40,6 +40,21 @@ ZOHO_REGION="$(pick "${CLAUDE_PLUGIN_OPTION_REGION:-}" "${ZOHO_REGION:-}")"
 # Optional: lets a fresh session sign in without the OAuth step (see config/zoho.php)
 ZOHO_REFRESH_TOKEN="$(pick "${ZOHO_REFRESH_TOKEN:-}")"
 
+# A cloud environment shared by a team can hold one token per person, named after
+# their GitHub login: ZOHO_REFRESH_TOKEN_<LOGIN>, uppercased with anything other
+# than letters and digits turned into "_" (idoko-emmanuel → ZOHO_REFRESH_TOKEN_IDOKO_EMMANUEL).
+# The session's GitHub connection says who is signed in.
+zoho_user_token_var() {
+  printf 'ZOHO_REFRESH_TOKEN_%s' "$(printf '%s' "$1" | tr '[:lower:]' '[:upper:]' | tr -c 'A-Z0-9' '_')"
+}
+if [[ -z "$ZOHO_REFRESH_TOKEN" && "${CLAUDE_CODE_REMOTE:-}" == "true" ]] && command -v gh >/dev/null; then
+  GITHUB_LOGIN="$(timeout 15 gh api user --jq .login 2>/dev/null || true)"
+  if [[ -n "$GITHUB_LOGIN" ]]; then
+    USER_TOKEN_VAR="$(zoho_user_token_var "$GITHUB_LOGIN")"
+    ZOHO_REFRESH_TOKEN="$(pick "${!USER_TOKEN_VAR:-}")"
+  fi
+fi
+
 # ── Lock: the hook and the MCP server can both start at session start ────────
 acquire_lock() {
   local waited=0
