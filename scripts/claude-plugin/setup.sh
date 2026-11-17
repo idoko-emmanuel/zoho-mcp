@@ -37,6 +37,8 @@ pick() { local v; for v in "$@"; do v="$(real "$v")" && { printf '%s' "$v"; retu
 ZOHO_CLIENT_ID="$(pick "${CLAUDE_PLUGIN_OPTION_CLIENT_ID:-}" "${ZOHO_CLIENT_ID:-}")"
 ZOHO_CLIENT_SECRET="$(pick "${CLAUDE_PLUGIN_OPTION_CLIENT_SECRET:-}" "${ZOHO_CLIENT_SECRET:-}")"
 ZOHO_REGION="$(pick "${CLAUDE_PLUGIN_OPTION_REGION:-}" "${ZOHO_REGION:-}")"
+# Optional: lets a fresh session sign in without the OAuth step (see config/zoho.php)
+ZOHO_REFRESH_TOKEN="$(pick "${ZOHO_REFRESH_TOKEN:-}")"
 
 # ── Lock: the hook and the MCP server can both start at session start ────────
 acquire_lock() {
@@ -170,6 +172,7 @@ set_env() {
 # (for example the /zoho-mcp:connect skill) keep what is already saved.
 if [[ -n "$ZOHO_CLIENT_ID" ]]; then set_env ZOHO_CLIENT_ID "\"$ZOHO_CLIENT_ID\""; fi
 if [[ -n "$ZOHO_CLIENT_SECRET" ]]; then set_env ZOHO_CLIENT_SECRET "\"$ZOHO_CLIENT_SECRET\""; fi
+if [[ -n "$ZOHO_REFRESH_TOKEN" ]]; then set_env ZOHO_REFRESH_TOKEN "\"$ZOHO_REFRESH_TOKEN\""; fi
 
 if [[ -n "$ZOHO_REGION" ]]; then
   case "$ZOHO_REGION" in

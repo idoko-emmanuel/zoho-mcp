@@ -10,7 +10,7 @@ bash "$HERE/setup.sh"
 # An unconfigured userConfig option reaches this process empty or as an
 # unexpanded "${user_config...}". Laravel lets a real environment variable win
 # over .env even when it is empty, so drop those and let the saved .env apply.
-for var in ZOHO_CLIENT_ID ZOHO_CLIENT_SECRET ZOHO_REGION; do
+for var in ZOHO_CLIENT_ID ZOHO_CLIENT_SECRET ZOHO_REGION ZOHO_REFRESH_TOKEN; do
   val="${!var:-}"
   if [[ -z "$val" || "$val" == '${'* ]]; then unset "$var"; fi
 done

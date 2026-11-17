@@ -129,6 +129,11 @@ Each person then connects their own Zoho account with `/zoho-mcp:connect` in the
 browser can't reach `localhost` inside a cloud session, so the skill gives them the Zoho link and
 they paste back the address their browser was sent to. The token lasts for that session only.
 
+To skip that step in every session, set `ZOHO_REFRESH_TOKEN` too. Print yours on a machine where
+the plugin is already connected with `php artisan zoho:refresh-token` (run in the plugin's `app`
+folder). A fresh session then signs in from it on first use. The token acts as the Zoho user who
+issued it, so put it in a **personal** cloud environment, never in one the team shares.
+
 ### macOS / Linux — One-line install
 
 The install script checks for PHP 8.3+, installs Composer if missing, clones the repo, sets up the database, prompts for your Zoho credentials, and registers the MCP server with Claude Code automatically.
