@@ -167,6 +167,11 @@ class ZohoAuthService
      */
     private function missingTokenMessage(): string
     {
+        if (config('zoho.cloud_session')) {
+            return 'No Zoho token found in this cloud session. Run /zoho-mcp:connect to authorise: '
+                .'the browser cannot reach localhost here, so the user pastes the callback URL back in.';
+        }
+
         $message = 'No Zoho token found. Visit '.url('/zoho/auth').' to authorise.';
 
         $scripts = config('zoho.plugin_scripts');
