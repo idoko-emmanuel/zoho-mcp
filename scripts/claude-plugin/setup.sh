@@ -116,13 +116,19 @@ find_composer() {
   COMPOSER=(php "$phar")
 }
 
-if [[ -f "$ROOT/vendor/autoload.php" ]]; then
-  # A release zip built by scripts/build-plugin-zip.sh ships vendor/, so no
+if [[ -f "$ROOT/vendor.tar.gz" || -f "$ROOT/vendor/autoload.php" ]]; then
+  # A release zip built by scripts/build-plugin-zip.sh ships its dependencies
+  # (as vendor.tar.gz, since plugin uploads allow at most 5000 files), so no
   # composer run (and no GitHub download) is needed at all.
   if [[ ! -f "$APP/vendor/autoload.php" ]] || ! cmp -s "$ROOT/composer.lock" "$APP/.composer.lock.installed"; then
-    log "Copying bundled PHP dependencies"
+    log "Unpacking bundled PHP dependencies"
     rm -rf "${APP:?}/vendor"
-    cp -R "$ROOT/vendor" "$APP/vendor"
+    if [[ -f "$ROOT/vendor.tar.gz" ]]; then
+      tar -xzf "$ROOT/vendor.tar.gz" -C "$APP" || fail "could not unpack vendor.tar.gz"
+    else
+      cp -R "$ROOT/vendor" "$APP/vendor"
+    fi
+    [[ -f "$APP/vendor/autoload.php" ]] || fail "bundled dependencies are missing vendor/autoload.php"
     cp "$APP/composer.lock" "$APP/.composer.lock.installed"
     rm -f "$APP"/bootstrap/cache/*.php
     synced=1
