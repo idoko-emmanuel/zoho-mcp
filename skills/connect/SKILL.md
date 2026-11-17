@@ -35,7 +35,26 @@ grep -E '^ZOHO_CLIENT_(ID|SECRET)=' "${CLAUDE_PLUGIN_DATA}/app/.env" | sed -E 's
 
 If either value is empty, tell the user to set the Client ID and Secret by running `/plugin`,
 opening **zoho-mcp**, and choosing **Configure**, then to start a new session and run this
-command again. Stop here.
+command again. In a cloud session (`CLAUDE_CODE_REMOTE` is `true`) they come from the
+environment variables `ZOHO_CLIENT_ID` and `ZOHO_CLIENT_SECRET` instead, which an admin sets
+on the cloud environment. Stop here.
+
+## Cloud sessions: paste the callback URL back
+
+Check with `echo "${CLAUDE_CODE_REMOTE:-}"`. If it prints `true`, this is a Claude Code cloud
+session. The user's browser cannot reach `localhost` inside it, so skip steps 3 to 5 and do this:
+
+1. Run `php "${CLAUDE_PLUGIN_DATA}/app/artisan" zoho:auth-url` and give the user the link.
+2. Tell them to open it, approve in Zoho, then copy the **whole address** from the browser's
+   address bar and paste it here. The page itself will fail to load because it points at
+   `localhost:8000`; that is expected. They need to be quick: the code expires in about two
+   minutes and works once.
+3. Run `php "${CLAUDE_PLUGIN_DATA}/app/artisan" zoho:connect '<pasted URL>'`. On success the
+   tools work straight away. On failure, start again from step 1.
+
+If their own machine has the local plugin's auth server running on port 8000, the page loads and
+that machine gets connected instead. They should stop it (or quit Claude Code locally) and retry.
+The token lives in this session only: a new cloud session needs connecting again.
 
 ## 3. Start the local auth server
 

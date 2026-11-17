@@ -27,11 +27,16 @@ exec 3>&2 1>>"$LOG" 2>&1
 log()  { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*"; }
 fail() { log "ERROR: $*"; echo "zoho-mcp: $* (log: $LOG)" >&3; exit 1; }
 
-# Credentials come from the plugin's userConfig: as ZOHO_* in the MCP server
-# env, or as CLAUDE_PLUGIN_OPTION_* in the SessionStart hook env.
-ZOHO_CLIENT_ID="${ZOHO_CLIENT_ID:-${CLAUDE_PLUGIN_OPTION_CLIENT_ID:-}}"
-ZOHO_CLIENT_SECRET="${ZOHO_CLIENT_SECRET:-${CLAUDE_PLUGIN_OPTION_CLIENT_SECRET:-}}"
-ZOHO_REGION="${ZOHO_REGION:-${CLAUDE_PLUGIN_OPTION_REGION:-}}"
+# Credentials come from the plugin's userConfig: as CLAUDE_PLUGIN_OPTION_* in the
+# SessionStart hook env, or as ZOHO_* in the MCP server env. When nothing was
+# configured (e.g. a plugin an organisation installs in Claude Code cloud
+# sessions), ZOHO_* from the environment is used instead. An unconfigured option
+# can arrive empty or as an unexpanded "${user_config...}", so treat both as unset.
+real() { [[ -n "$1" && "$1" != '${'* ]] && printf '%s' "$1"; }
+pick() { local v; for v in "$@"; do v="$(real "$v")" && { printf '%s' "$v"; return 0; }; done; return 0; }
+ZOHO_CLIENT_ID="$(pick "${CLAUDE_PLUGIN_OPTION_CLIENT_ID:-}" "${ZOHO_CLIENT_ID:-}")"
+ZOHO_CLIENT_SECRET="$(pick "${CLAUDE_PLUGIN_OPTION_CLIENT_SECRET:-}" "${ZOHO_CLIENT_SECRET:-}")"
+ZOHO_REGION="$(pick "${CLAUDE_PLUGIN_OPTION_REGION:-}" "${ZOHO_REGION:-}")"
 
 # ── Lock: the hook and the MCP server can both start at session start ────────
 acquire_lock() {
@@ -111,11 +116,26 @@ find_composer() {
   COMPOSER=(php "$phar")
 }
 
-if [[ ! -f "$APP/vendor/autoload.php" ]] || ! cmp -s "$APP/composer.lock" "$APP/.composer.lock.installed"; then
+if [[ -f "$ROOT/vendor/autoload.php" ]]; then
+  # A release zip built by scripts/build-plugin-zip.sh ships vendor/, so no
+  # composer run (and no GitHub download) is needed at all.
+  if [[ ! -f "$APP/vendor/autoload.php" ]] || ! cmp -s "$ROOT/composer.lock" "$APP/.composer.lock.installed"; then
+    log "Copying bundled PHP dependencies"
+    rm -rf "${APP:?}/vendor"
+    cp -R "$ROOT/vendor" "$APP/vendor"
+    cp "$APP/composer.lock" "$APP/.composer.lock.installed"
+    rm -f "$APP"/bootstrap/cache/*.php
+    synced=1
+  fi
+elif [[ ! -f "$APP/vendor/autoload.php" ]] || ! cmp -s "$APP/composer.lock" "$APP/.composer.lock.installed"; then
   find_composer
-  log "Installing PHP dependencies"
+  # Claude Code cloud sessions refuse GitHub zipball downloads, so every dist
+  # download fails and falls back to git anyway: go straight to source there.
+  prefer=--prefer-dist
+  [[ "${CLAUDE_CODE_REMOTE:-}" == "true" ]] && prefer=--prefer-source
+  log "Installing PHP dependencies ($prefer)"
   "${COMPOSER[@]}" install --no-dev --no-interaction --no-scripts --no-progress \
-    --prefer-dist --optimize-autoloader --working-dir="$APP" \
+    "$prefer" --optimize-autoloader --working-dir="$APP" \
     || fail "composer install failed"
   cp "$APP/composer.lock" "$APP/.composer.lock.installed"
   rm -f "$APP"/bootstrap/cache/*.php

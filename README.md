@@ -111,6 +111,24 @@ credential store. The plugin also writes it to the app's `.env` file in the fold
 > Already installed with `install.sh`? Remove the old registration so the tools don't appear
 > twice: `claude mcp remove zoho-sprints --scope user`
 
+### Claude Code cloud sessions (organisation plugin)
+
+To make the plugin available in Claude Code on the web for a whole organisation:
+
+1. Build a zip with its PHP dependencies bundled: `scripts/build-plugin-zip.sh`, which writes
+   `dist/zoho-mcp-<version>.zip`. Cloud sessions can't download GitHub zipballs, so without a
+   bundled `vendor/` the first session spends about 10 minutes cloning packages from git.
+2. In claude.ai, open **Organization settings → Plugins & skills → Add → Upload a plugin**, upload
+   the zip, then set **Install** to *Installed by default*.
+3. On the cloud environment (**Organization settings → Cloud environments**), add the environment
+   variables `ZOHO_CLIENT_ID` and `ZOHO_CLIENT_SECRET` for the team's Zoho OAuth app. Anyone who
+   can use that environment can read them. A Client ID and Secret configured in `/plugin` take
+   precedence over them.
+
+Each person then connects their own Zoho account with `/zoho-mcp:connect` in the session. The
+browser can't reach `localhost` inside a cloud session, so the skill gives them the Zoho link and
+they paste back the address their browser was sent to. The token lasts for that session only.
+
 ### macOS / Linux — One-line install
 
 The install script checks for PHP 8.3+, installs Composer if missing, clones the repo, sets up the database, prompts for your Zoho credentials, and registers the MCP server with Claude Code automatically.

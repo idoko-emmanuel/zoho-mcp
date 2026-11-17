@@ -187,6 +187,27 @@ it('starts the plugin auth server and points to the fallback when no token is st
     }
 });
 
+it('points to /zoho-mcp:connect without starting the auth server in a cloud session', function () {
+    $dir = sys_get_temp_dir().'/zoho-mcp-plugin-'.uniqid();
+    mkdir($dir);
+    $marker = $dir.'/started';
+    file_put_contents($dir.'/auth-server.sh', "#!/usr/bin/env bash\necho \"\$1\" > ".escapeshellarg($marker)."\n");
+    config(['zoho.plugin_scripts' => $dir, 'zoho.cloud_session' => true]);
+
+    try {
+        expect(fn () => $this->service->getValidToken())
+            ->toThrow(RuntimeException::class, 'Run /zoho-mcp:connect');
+
+        usleep(500_000);
+
+        expect(is_file($marker))->toBeFalse();
+    } finally {
+        @unlink($marker);
+        @unlink($dir.'/auth-server.sh');
+        @rmdir($dir);
+    }
+});
+
 it('does not mention the plugin outside the Claude Code plugin', function () {
     config(['zoho.plugin_scripts' => null]);
 

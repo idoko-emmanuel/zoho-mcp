@@ -27,6 +27,17 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Claude Code cloud session
+    |--------------------------------------------------------------------------
+    | True inside a Claude Code on the web session. The browser cannot reach
+    | localhost there, so authorisation goes through /zoho-mcp:connect, where
+    | the user pastes the callback URL back in.
+    */
+
+    'cloud_session' => env('CLAUDE_CODE_REMOTE') === true || env('CLAUDE_CODE_REMOTE') === 'true',
+
+    /*
+    |--------------------------------------------------------------------------
     | Zoho Accounts URL
     |--------------------------------------------------------------------------
     | Use the data centre matching your Zoho account region:
