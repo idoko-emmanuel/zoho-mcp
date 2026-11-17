@@ -70,6 +70,12 @@ class ZohoAuthService
     {
         $token = ZohoToken::latest()->first();
 
+        if (! $token && filled(config('zoho.refresh_token'))) {
+            // No saved login (e.g. a fresh cloud session): sign in from the refresh
+            // token in the environment instead of asking the user to authorise.
+            return $this->refresh(new ZohoToken(['refresh_token' => config('zoho.refresh_token')]))->access_token;
+        }
+
         if (! $token) {
             throw new RuntimeException($this->missingTokenMessage());
         }

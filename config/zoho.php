@@ -15,6 +15,16 @@ return [
     'redirect_uri' => env('ZOHO_REDIRECT_URI', env('APP_URL').'/zoho/callback'),
 
     /*
+    | Optional. A refresh token from an earlier authorisation. When no login is
+    | saved, the server signs in with it instead of asking the user to authorise,
+    | so Claude Code cloud sessions (which start empty) work without a login step.
+    | It acts as the Zoho user who issued it, so keep it to that user's own
+    | environment. Print yours locally with `php artisan zoho:refresh-token`.
+    */
+
+    'refresh_token' => env('ZOHO_REFRESH_TOKEN'),
+
+    /*
     |--------------------------------------------------------------------------
     | Claude Code plugin
     |--------------------------------------------------------------------------

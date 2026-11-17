@@ -36,6 +36,8 @@ fi
 # Cloud session: the browser cannot reach localhost here, so don't start the
 # local auth server. /zoho-mcp:connect has the user paste the callback URL back.
 if (( CLOUD )); then
+  # A ZOHO_REFRESH_TOKEN in the environment signs the session in on first use.
+  if grep -Eq '^ZOHO_REFRESH_TOKEN=.+' "$ENV_FILE"; then exit 0; fi
   if [[ "$(bash "$HERE/auth-server.sh" status 2>/dev/null || true)" != "connected" ]]; then
     say "Zoho Sprints isn't connected in this cloud session. Run /zoho-mcp:connect when you need it." \
         "The zoho-mcp plugin is not authorised with Zoho in this cloud session (tokens do not carry over between cloud sessions). If the user asks about Zoho Sprints, or a zoho tool says no token was found, run the /zoho-mcp:connect skill: it gives them a link, they approve in Zoho, then paste back the URL their browser was sent to."
